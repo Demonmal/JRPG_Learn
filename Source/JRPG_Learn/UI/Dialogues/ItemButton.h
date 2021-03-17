@@ -7,6 +7,7 @@
 #include "ItemButton.generated.h"
 
 class AItemBase;
+class UTextBlock;
 
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnItemButtonClickedSignature, TSubclassOf<AItemBase>, UItemButton*);
 
@@ -17,20 +18,24 @@ class JRPG_LEARN_API UItemButton : public UUserWidget
 
 	public:
 
+	virtual void NativeConstruct() override;
+
 	FOnItemButtonClickedSignature OnItemButtonClicked;
 
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	class UImage* ItemImage;
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-	class UTextBlock* ItemName;
+	UTextBlock* ItemName;
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-	class UTextBlock* AmountText;
+	UTextBlock* AmountText;
 
 	UPROPERTY(BlueprintReadWrite)
 	TSubclassOf<AItemBase> Item;
 	UPROPERTY(BlueprintReadWrite)
 	int Amount;
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void Highlight(bool bIsHighlighted);
 	UFUNCTION(BlueprintImplementableEvent)
 	void UpdateItemDetails(TSubclassOf<AItemBase> CachedItem, int ItemAmount);
 
@@ -42,4 +47,10 @@ class JRPG_LEARN_API UItemButton : public UUserWidget
 	void SetAmount();
 	UFUNCTION(BlueprintCallable)
 	void SetEmpty();
+	UFUNCTION(BlueprintCallable)
+	void PlayMenuNavigationSound();
+
+	private:
+
+	TWeakObjectPtr<class AAudioPlayerController> AudioPlayerController;
 };

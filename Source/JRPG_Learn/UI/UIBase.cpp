@@ -1,8 +1,16 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "UIBase.h"
+#include "../Controllers/AudioPlayerController.h"
+#include "../Controllers/JRPG_GameInstance.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerController.h"
+
+void UUIBase::NativeConstruct()
+{
+	AudioPlayerController = Cast<UJRPG_GameInstance>(UGameplayStatics::GetGameInstance(GetWorld()))->AudioPlayerController(GetWorld());
+	Super::NativeConstruct();
+}
 
 void UUIBase::FocusOnThisUI()
 {
@@ -93,6 +101,11 @@ void UUIBase::ListenMenuDetailsLogic()
     {
         MenuDetails();
     }
+}
+
+void UUIBase::PlayConfirmSound()
+{
+    AudioPlayerController->PlaySoundByTag("Confirm");
 }
 
 void UUIBase::SetUIInput(bool bIsBlocked)

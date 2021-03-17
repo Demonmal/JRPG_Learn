@@ -14,6 +14,7 @@ class JRPG_LEARN_API AItemBase : public AActor
 public:
 
 	FORCEINLINE FText GetName() const {return Name;}
+	FORCEINLINE FText GetShortDescription() const {return ShortDescription;}
 	FORCEINLINE UTexture2D* GetIcon() const {return Icon;}
 	
 protected:

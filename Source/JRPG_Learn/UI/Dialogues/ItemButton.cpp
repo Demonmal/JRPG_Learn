@@ -2,10 +2,19 @@
 
 
 #include "ItemButton.h"
+#include "../../Controllers/AudioPlayerController.h"
+#include "../../Controllers/JRPG_GameInstance.h"
+#include "Kismet/GameplayStatics.h"
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "../../Items/ItemBase.h"
+
+void UItemButton::NativeConstruct()
+{
+	AudioPlayerController = Cast<UJRPG_GameInstance>(UGameplayStatics::GetGameInstance(GetWorld()))->AudioPlayerController(GetWorld());
+	Super::NativeConstruct();
+}
 
 void UItemButton::SetItemTextAndTexture()
 {
@@ -20,6 +29,11 @@ void UItemButton::CallOnItemButtonClicked()
     {
         OnItemButtonClicked.Broadcast(Item, this);
     }
+}
+
+void UItemButton::PlayMenuNavigationSound()
+{
+    AudioPlayerController->PlaySoundByTag("MenuNavigation");
 }
 
 void UItemButton::SetAmount()

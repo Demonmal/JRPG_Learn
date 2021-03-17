@@ -16,6 +16,8 @@ class JRPG_LEARN_API UUIBase : public UUserWidget
 
 	public:
 
+	virtual void NativeConstruct() override;
+
 	UFUNCTION(BlueprintCallable)
 	void FocusOnThisUI();
 
@@ -36,11 +38,13 @@ class JRPG_LEARN_API UUIBase : public UUserWidget
 
 	UFUNCTION(BlueprintCallable)
 	void SetUIInput(bool bIsBlocked);
+	UFUNCTION(BlueprintCallable)
+	void PlayConfirmSound();
 
 	UPROPERTY(BlueprintReadWrite)
 	bool bIsUIInputBlocked;
 
-	private:
+	protected:
 
 	void ListenInputActions();
 
@@ -66,5 +70,7 @@ class JRPG_LEARN_API UUIBase : public UUserWidget
 	void ListenMenuCancelLogic();
 	UFUNCTION()
 	void ListenMenuDetailsLogic();
+
+	TWeakObjectPtr<class AAudioPlayerController> AudioPlayerController;
 
 };

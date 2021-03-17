@@ -17,6 +17,7 @@ class AShieldBase;
 class AHelmBase;
 class ABootsBase;
 class USoundBase;
+class ABattleTransitionBase;
 
 USTRUCT(BlueprintType)
 struct FSound : public FTableRowBase
@@ -142,6 +143,15 @@ struct FThumbnail
 	GENERATED_BODY()
 
 	class UTexture2D* Thumbnail;
+};
+
+USTRUCT(BlueprintType)
+struct FOffLevelBattleData
+{
+	GENERATED_BODY()
+
+	FName BattleLevelName;
+	TSubclassOf<ABattleTransitionBase> BattleLevelTransition;
 };
 
 UCLASS()

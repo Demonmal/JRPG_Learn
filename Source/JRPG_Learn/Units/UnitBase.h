@@ -70,9 +70,22 @@ public:
 	FORCEINLINE bool IsStuned() const { return bIsStuned; }
 	FORCEINLINE bool IsMoving() const { return bIsMoving; }
 	FORCEINLINE bool IsMovingForward() const { return bIsMovingForward; }
+	FORCEINLINE float GetActionTime() const { return ActionTime; }
+	FORCEINLINE float GetCurrentActionTime() const { return CurrentActionTime; }
 	FORCEINLINE int GetMaxLevel() const { return MaxLevel; }
+	FORCEINLINE int GetCurrentHP() const { return CurrentHP; }
+	FORCEINLINE int GetCurrentMP() const { return CurrentMP; }
 	FORCEINLINE int GetMaxHP() const { return MaxHP; }
 	FORCEINLINE int GetMaxMP() const { return MaxMP; }
+	FORCEINLINE int GetUnitLevel() const { return Level; }
+	FORCEINLINE int GetMinAttack() const { return MinAttack; }
+	FORCEINLINE int GetMaxAttack() const { return MaxAttack; }
+	FORCEINLINE int GetMinMagicalAttack() const { return MinMagicalAttack; }
+	FORCEINLINE int GetMaxMagicalAttack() const { return MaxMagicalAttack; }
+	FORCEINLINE int GetDefense() const { return Defense; }
+	FORCEINLINE int GetMagicDefense() const { return MagicDefense; }
+	FORCEINLINE int GetHit() const { return Hit; }
+	FORCEINLINE int GetSpeed() const { return Speed; }
 	FORCEINLINE FUnitStats GetInitialStats() const { return InitialStats; }
 	FORCEINLINE FUnitStats GetFirstLevelStats() const { return FirstLevelStats; }
 	FORCEINLINE FUnitStats GetLastLevelStats() const { return LastLevelStats; }
@@ -80,6 +93,8 @@ public:
 	FORCEINLINE UAnimSequence *GetDieAnim() const { return DieAnim; }
 	FORCEINLINE USceneComponent *GetCameraLookLocation() const { return CameraLookLocation; }
 	FORCEINLINE FText GetTitle() const { return Title; }
+	FORCEINLINE UTexture2D *GetThumbnail() const { return Thumbnail; }
+
 
 	FORCEINLINE UAnimMontage * GetItemUseAnimMontage() const { return ItemUseAnimMontage; }
 

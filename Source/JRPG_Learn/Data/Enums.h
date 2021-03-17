@@ -107,6 +107,14 @@ enum class ESkillType : uint8
 	Defensive
 };
 
+UENUM(BlueprintType)
+enum class EBattleResult : uint8
+{
+	PlayerWon,
+	EnemyWon,
+	Fled
+};
+
 UCLASS()
 class JRPG_LEARN_API UEnums : public UBlueprintFunctionLibrary
 {

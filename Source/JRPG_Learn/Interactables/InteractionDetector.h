@@ -12,6 +12,7 @@ DECLARE_MULTICAST_DELEGATE(FOnInteractionDisapperedSignature)
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnLoadedSignature, bool)
 
 class USphereComponent;
+class AJRPG_PlayerController;
 
 UCLASS()
 class JRPG_LEARN_API AInteractionDetector : public AActor
@@ -35,7 +36,7 @@ public:
 	void OnInteract();
 
 	FORCEINLINE void SetCanInteractState(bool bState) {bCanInteract = bState;}
-	FORCEINLINE void SetPlayerController (AJRPG_PlayerController* Controller) {PlayerController = Controller;}
+	FORCEINLINE void SetPlayerController (TWeakObjectPtr<AJRPG_PlayerController> Controller) {PlayerController = Controller;}
 	FORCEINLINE AJRPG_PlayerController* GetPlayerController () {return PlayerController.Get();}
 	FORCEINLINE USphereComponent* GetInteractionSphere () {return InteractionSphere;}
 	FORCEINLINE bool GetCanInteract () {return bCanInteract;}
@@ -85,7 +86,7 @@ private:
 	UPROPERTY()
 	class UInteractionUI* InteractionUI;
 
-	TWeakObjectPtr<class AJRPG_PlayerController> PlayerController;
+	TWeakObjectPtr<AJRPG_PlayerController> PlayerController;
 	TWeakObjectPtr<class ASkillBase> CurrentExploreSkill;
 	TWeakObjectPtr<class UJRPG_GameInstance> GameInstance;
 	bool bCanInteract = true;

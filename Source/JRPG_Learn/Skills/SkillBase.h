@@ -20,10 +20,13 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void UseSkill();
 
-	FORCEINLINE int GetManaRequired() const {return ManaRequired;}
+	FORCEINLINE int GetManaRequired() const { return ManaRequired; }
+	FORCEINLINE FText GetName() { return Name; }
+	FORCEINLINE FText GetShortDescription() { return ShortDescription; }
+	FORCEINLINE UTexture2D *GetIcon() { return Icon; }
 
-	FORCEINLINE void SetPlayerController (AJRPG_PlayerController* Controller) {PlayerController = Controller;}
-	
+	FORCEINLINE void SetPlayerController(AJRPG_PlayerController *Controller) { PlayerController = Controller; }
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FText Name;
@@ -32,11 +35,11 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FText FullDescription;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	UTexture2D* Icon;
+	UTexture2D *Icon;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	int ManaRequired;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool CanUseInExplore;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	AJRPG_PlayerController* PlayerController;
+	AJRPG_PlayerController *PlayerController;
 };
