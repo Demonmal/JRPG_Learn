@@ -8,6 +8,7 @@
 #include "DataTypes.generated.h"
 
 class APlayerUnitBase;
+class AEnemyUnitBase;
 class AEquipmentBase;
 class AMiscItemBase;
 class AUsableItemBase;
@@ -33,21 +34,21 @@ struct FPlayerUnitData : public FTableRowBase
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditAnywhere)
 	int Exp;
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditAnywhere)
 	int CurrentHP;
 	UPROPERTY(EditDefaultsOnly)
 	int CurrentMP;
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditAnywhere)
 	TSubclassOf<AWeaponBase> Weapon;
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditAnywhere)
 	TSubclassOf<AArmorBase> Armor;
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditAnywhere)
 	TSubclassOf<AShieldBase> Shield;
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditAnywhere)
 	TSubclassOf<AHelmBase> Helm;
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditAnywhere)
 	TSubclassOf<ABootsBase> Boots;
 };
 
@@ -56,27 +57,27 @@ struct FUnitStats : public FTableRowBase
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditAnywhere)
 	int MaxHP;
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditAnywhere)
 	int MaxMP;
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditAnywhere)
 	int MinAttack;
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditAnywhere)
 	int MaxAttack;
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditAnywhere)
 	int Defense;
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditAnywhere)
 	int Speed;
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditAnywhere)
 	int Hit;
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditAnywhere)
 	int MinMagicalAttack;
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditAnywhere)
 	int MaxMagicalAttack;
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditAnywhere)
 	int MagicDefense;
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditAnywhere)
 	float ActionTime;
 
 	FUnitStats operator+(const FUnitStats &Stats)
@@ -102,11 +103,11 @@ struct FQuestSounds
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditAnywhere)
 	USoundBase* NewQuestSound;
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditAnywhere)
 	USoundBase* QuestUpdateSound;
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditAnywhere)
 	USoundBase* QuestCompletedSound;
 };
 
@@ -115,26 +116,38 @@ struct FQuestRewards
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditAnywhere)
 	TSubclassOf<APlayerUnitBase> PlayerUnit;
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditAnywhere)
 	TMap<TSubclassOf<AUsableItemBase>, int> UsableItems;
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditAnywhere)
 	TMap<TSubclassOf<AMiscItemBase>, int> MiscItems;
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditAnywhere)
 	TMap<TSubclassOf<AEquipmentBase>, int> Equipment;
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditAnywhere)
 	int Gold;
 };
 
 USTRUCT(BlueprintType)
-struct FEnemyUnitSpawnData
+struct FEnemyUnitSpawnData : public FTableRowBase
 {
 	GENERATED_BODY()
 
+	UPROPERTY(EditAnywhere)
 	float SpawnChance;
+	UPROPERTY(EditAnywhere)
 	int MinLevel;
+	UPROPERTY(EditAnywhere)
 	int MaxLevel;
+};
+
+USTRUCT(BlueprintType)
+struct FEnemyUnitSpawnDataList : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere)
+	TMap<TSubclassOf<AEnemyUnitBase>, FEnemyUnitSpawnData> EnemyList;
 };
 
 USTRUCT(BlueprintType)
@@ -146,11 +159,13 @@ struct FThumbnail
 };
 
 USTRUCT(BlueprintType)
-struct FOffLevelBattleData
+struct FOffLevelBattleData : public FTableRowBase
 {
 	GENERATED_BODY()
 
+	UPROPERTY(EditAnywhere)
 	FName BattleLevelName;
+	UPROPERTY(EditAnywhere)
 	TSubclassOf<ABattleTransitionBase> BattleLevelTransition;
 };
 

@@ -18,6 +18,7 @@ class AMiscItemBase;
 class AEquipmentBase;
 class AJRPG_CharacterBase;
 class AQuestBase;
+class ABattleController;
 
 UCLASS()
 class JRPG_LEARN_API AJRPG_PlayerController : public APlayerController
@@ -43,6 +44,7 @@ public:
 	FTransform GetExploreCharacterTransform();
 	void BindOverlapEvents();
 	void UnbindOverlapEvents();
+
 	UFUNCTION()
 	void OnComponentBeginOverlap(UPrimitiveComponent *OverlappedComponent, AActor *OtherActor, UPrimitiveComponent *OtherComp,
                                                      int32 OtherBodyIndex, bool bFromSweep, const FHitResult &SweepResult);
@@ -53,16 +55,26 @@ public:
 	void AddAllMiscItemsToInventory(TMap<TSubclassOf<AMiscItemBase>, int>);
 	void AddAllEquipmentToInventory(TMap<TSubclassOf<AEquipmentBase>, int>);
 	void AddGold(float Amount);
-
 	void OnUsableItemUsed(TSubclassOf<AUsableItemBase>, int);
-
 	void RefreshInteractions();
+	void ChangeGameState(EGameState State);
+	void DisableCharacter(bool bIsDisabled);
+	void OnBattleOver();
+	void RefreshBattleInteractions();
+	void UpdatePlayerUnitsData(int TotalExp, TArray<APlayerUnitBase*> AliveUnits, TArray<TSubclassOf<APlayerUnitBase>> DeadUnits);
+	void RemoveFromParty(TSubclassOf<APlayerUnitBase> Unit);
+
+	void PlaySound2DByTag(FName Tag);
 
 	FORCEINLINE void SetBlockPlayerUnitState(bool bState) {bIsInputBlocked = bState;}
 
 	bool TryGetUnitDataByPlayer(TSubclassOf<APlayerUnitBase>, FPlayerUnitData &);
 
 	FORCEINLINE AJRPG_CharacterBase* GetExploreCharacter() {return ExploreCharacter.Get();}
+	FORCEINLINE TMap<TSubclassOf<AUsableItemBase>, int> GetUsableItems() {return UsableItems;}
+	FORCEINLINE TMap<TSubclassOf<AMiscItemBase>, int> GetMiscItems() {return MiscItems;}
+	FORCEINLINE TMap<TSubclassOf<AEquipmentBase>, int> GetEquipments() {return Equipments;}
+	FORCEINLINE TArray<TSubclassOf<APlayerUnitBase>> GetPartyMembers() {return PartyMembers;}
 	FORCEINLINE bool IsQuestCompleted(TSubclassOf<AQuestBase> Quest) {return CompletedQuests.Contains(Quest);}
 
 protected:
@@ -126,7 +138,9 @@ private:
 	TWeakObjectPtr<AJRPG_CharacterBase> CachedCharacter;
 	TWeakObjectPtr<AJRPG_CharacterBase> ExploreCharacter;
 	TWeakObjectPtr<class AInteractionDetector> Interactable;
+	TWeakObjectPtr<class AAudioPlayerController> AudioController;
 
+	EGameState GameState = EGameState::Explore;
 	float BlendTimeToNewCharacter = 0.5f;
 	float MinPartyMemberSpawnOffset = -50.f;
 	float MaxPartyMemberSpawnOffset = -100.f;

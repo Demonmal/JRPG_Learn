@@ -6,15 +6,24 @@
 #include "GameFramework/Actor.h"
 #include "UnitSpawnLocation.generated.h"
 
+class ABattleBase;
+class UStaticMeshComponent;
+class UArrowComponent;
+
 UCLASS()
 class JRPG_LEARN_API AUnitSpawnLocation : public AActor
 {
 	GENERATED_BODY()
 	
-public:	
-	// Sets default values for this actor's properties
-	AUnitSpawnLocation();
+public:
 
-	void Init();
+	void Init(ABattleBase *Battle_l);
+
+protected:
+
+	UFUNCTION()
+	void OnBattleDestroyedHandler(AActor* DestroyedActor);
+
+	TWeakObjectPtr<ABattleBase> Battle;
 
 };

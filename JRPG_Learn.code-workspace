@@ -21,11 +21,7 @@
 			"set": "cpp",
 			"xhash": "cpp",
 			"xtree": "cpp",
-			"xutility": "cpp",
-			"*.rh": "cpp",
-			"initializer_list": "cpp",
-			"iosfwd": "cpp",
-			"iostream": "cpp"
+			"xutility": "cpp"
 		}
 	},
 	"extensions": {

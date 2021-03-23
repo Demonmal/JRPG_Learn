@@ -9,10 +9,13 @@
 #include "Components/ArrowComponent.h"
 #include "Animation/AnimMontage.h"
 #include "Animation/AnimSequence.h"
+#include "Animation/AnimInstance.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/GameplayStatics.h"
+#include "../Battle/BattleBase.h"
 #include "../Controllers/JRPG_FunctionLibrary.h"
+#include "../Controllers/JRPG_PlayerController.h"
 #include "../UI/TargetIcon.h"
 #include "../UI/DamageTextUI.h"
 
@@ -66,6 +69,19 @@ AUnitBase::AUnitBase()
 	BackCameraActor->SetupAttachment(BackCameraSpringArm);
 }
 
+void AUnitBase::BeginPlay()
+{
+	AnimInstance = (SkeletalMesh)? SkeletalMesh->GetAnimInstance() : nullptr; 
+	PlayerController = Cast<AJRPG_PlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+}
+
+void AUnitBase::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+	RotationTimeline.TickTimeline(DeltaSeconds);
+	MovementTimeline.TickTimeline(DeltaSeconds);
+}
+
 void AUnitBase::InitUnit(ABattleController *Controller)
 {
 	BattleController = Controller;
@@ -74,12 +90,28 @@ void AUnitBase::InitUnit(ABattleController *Controller)
 	{
 		OnActionTimeAdded.Broadcast(0);
 	}
-	PlayAnimationMontage(IntroAnimMontage);
+	PlayAnimMontage(IntroAnimMontage);
 	TargetIconUI = Cast<UTargetIcon>(TargetIconWidget);
 	FTransform MeshTransform = SkeletalMesh->GetComponentTransform();
 	InitialLocation = MeshTransform.GetLocation();
 	InitialRotation = MeshTransform.GetRotation();
 	SpawnedTransform = GetActorTransform();
+	Battle->OnBattleRemoved.AddUObject(this, &AUnitBase::OnBattleRemovedHandler);
+}
+
+void AUnitBase::OnBattleRemovedHandler()
+{
+	Destroy();
+}
+
+void AUnitBase::SetBattle(ABattleBase * Battle_l)
+{
+	Battle = TWeakObjectPtr<ABattleBase>(Battle_l);
+}
+
+bool AUnitBase::IsRangeUnit()
+{
+	return UKismetSystemLibrary::IsValidClass(Projectile);
 }
 
 void AUnitBase::SetUnitStats()
@@ -115,13 +147,6 @@ void AUnitBase::AddActionTime(float Time)
 	CurrentActionTime = NewActionTime;
 }
 
-void AUnitBase::PlayAnimationMontage(UAnimMontage *Montage)
-{
-	if (!IsValid(Montage))
-		return;
-	SkeletalMesh->PlayAnimation(Montage, false);
-}
-
 void AUnitBase::FocusOnTarget(FRotator Rotation)
 {
 	TargetRotation = Rotation;
@@ -146,7 +171,7 @@ void AUnitBase::MoveToTarget(FVector Location, bool bIsForward)
 {
 	TargetLocation = Location;
 	StartLocation = SkeletalMesh->GetComponentLocation();
-	PlayAnimationMontage(bIsForward ? DashForwardAnimMontage : DashBackwardAnimMontage);
+	PlayAnimMontage(bIsForward ? DashForwardAnimMontage : DashBackwardAnimMontage);
 	float NewPlayRate = MoveSpeed / (TargetLocation - StartLocation).Size();
 	MovementTimeline.SetPlayRate(NewPlayRate);
 	if (IsValid(MovementTimelineCurve))
@@ -169,7 +194,7 @@ void AUnitBase::MovementTimelineUpdate(const float Alpha)
 
 void AUnitBase::MovementByTimelineFinished()
 {
-	PlayAnimationMontage(IdleAnimMontage);
+	PlayAnimMontage(IdleAnimMontage);
 	if (OnMovedToTarget.IsBound())
 	{
 		OnMovedToTarget.Broadcast();
@@ -200,7 +225,6 @@ void AUnitBase::EndTurn()
 
 void AUnitBase::SwitchToFrontCamera(bool bIsInstant)
 {
-	auto PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	if(PlayerController->GetViewTarget() != FrontCameraActor->GetChildActor())
 	{
 		float BlendTime = bIsInstant ? 0.f : MaxBlendCameraSpeed;
@@ -240,7 +264,7 @@ void AUnitBase::ReceiveDamage(int Damage)
 	SetHP(NewHP);
 	if (!IsUnitDead() && Damage > 0)
 	{
-		PlayAnimationMontage(bIsStuned ? StunAnimMontage : GetHitAnimMontage);
+		PlayAnimMontage(bIsStuned ? StunAnimMontage : GetHitAnimMontage);
 	}
 }
 
@@ -287,4 +311,27 @@ void AUnitBase::OnDied()
 	FLatentActionInfo LatentActionInfo;
 	UKismetSystemLibrary::Delay(GetWorld(), DelayBeforeDie, LatentActionInfo);
 	Destroy();
+}
+
+float AUnitBase::PlayAnimMontage(UAnimMontage *AnimMontage, float InPlayRate , FName StartSectionName)
+{
+	if( AnimMontage && AnimInstance )
+	{
+		float const Duration = AnimInstance->Montage_Play(AnimMontage, InPlayRate);
+
+		if (Duration > 0.f)
+		{
+			if( StartSectionName != NAME_None )
+			{
+				AnimInstance->Montage_JumpToSection(StartSectionName, AnimMontage);
+			}
+		}
+	}
+	return .0f;	
+}
+
+FTransform AUnitBase::GetProjectileSpawnTransform()
+{
+	FTransform ProjectileSpawnTransform = SkeletalMesh->GetSocketTransform(ProjectileSocketName);
+	return ProjectileSpawnTransform;
 }

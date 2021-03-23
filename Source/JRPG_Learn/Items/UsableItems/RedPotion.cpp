@@ -12,7 +12,7 @@
 
 void ARedPotion::OnUsedInBattle(AUnitBase *Unit, TSubclassOf<APlayerUnitBase> PlayerUnitClass)
 {
-    Unit->PlayAnimationMontage(Unit->GetItemUseAnimMontage());
+    Unit->PlayAnimMontage(Unit->GetItemUseAnimMontage());
     Unit->Heal(UKismetMathLibrary::FTrunc(Unit->GetMaxHP() * HealPercent));
     FLatentActionInfo LatentActionInfo;
     UKismetSystemLibrary::Delay(GetWorld(), 1.5f, LatentActionInfo);

@@ -2,6 +2,7 @@
 
 
 #include "SkillBase.h"
+#include "../Controllers/JRPG_PlayerController.h"
 
 void ASkillBase::UseSkill()
 {
@@ -9,4 +10,9 @@ void ASkillBase::UseSkill()
 	{
 		OnSkillUsed.Broadcast();
 	}
+}
+
+void ASkillBase::SetPlayerController(AJRPG_PlayerController *Controller)
+{
+	PlayerController = TWeakObjectPtr<AJRPG_PlayerController>(Controller);
 }

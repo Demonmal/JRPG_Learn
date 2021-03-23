@@ -9,7 +9,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Abstract)
 class JRPG_LEARN_API AExploreSkillBase : public ASkillBase
 {
 	GENERATED_BODY()

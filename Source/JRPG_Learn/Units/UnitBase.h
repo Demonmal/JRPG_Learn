@@ -23,6 +23,12 @@ class USceneComponent;
 class UAnimMontage;
 class UAnimSequence;
 class ABattleController;
+class AJRPG_PlayerController;
+class AProjectileBase;
+class USkeletalMeshComponent;
+class UAnimInstance;
+class ABattleBase;
+class UArrowComponent;
 
 UCLASS()
 class JRPG_LEARN_API AUnitBase : public AActor
@@ -42,29 +48,35 @@ public:
 	FOnTurnStartedSignature OnTurnStarted;
 	FOnMovedToTargetSignature OnMovedToTarget;
 
+	virtual void Tick(float DeltaSeconds) override;
+
 	virtual void InitUnit(ABattleController *Controller);
 	virtual void SetUnitStats();
-	void AddActionTime(float Time);
-	void PlayAnimationMontage(UAnimMontage *Montage);
-	void FocusOnTarget(FRotator Rotation);
-	void MoveToTarget(FVector Location, bool bIsForward);
-	void AdjustAttackerLocation(AUnitBase *Unit);
-	void StartTurn();
-	void EndTurn();
-	void SwitchToFrontCamera(bool bIsInstant);
-	void SetTargetIconVisibility(bool bVisibilityState);
-	void Heal(int HealAmount);
-	void IncreaseMP(int ManaAmount);
-	void ReceiveDamage(int Damage);
-	void UseMP(int ManaAmount);
-	void SetHP(int HealthAmount);
-	void SetMP(int ManaAmount);
-	void Die();
-	void OnDied();
+	virtual void AddActionTime(float Time);
+	virtual void FocusOnTarget(FRotator Rotation);
+	virtual void MoveToTarget(FVector Location, bool bIsForward);
+	virtual void AdjustAttackerLocation(AUnitBase *Unit);
+	virtual void StartTurn();
+	virtual void EndTurn();
+	virtual void SwitchToFrontCamera(bool bIsInstant);
+	virtual void SetTargetIconVisibility(bool bVisibilityState);
+	virtual void Heal(int HealAmount);
+	virtual void IncreaseMP(int ManaAmount);
+	virtual void ReceiveDamage(int Damage);
+	virtual void UseMP(int ManaAmount);
+	virtual void SetHP(int HealthAmount);
+	virtual void SetMP(int ManaAmount);
+	virtual void Die();
+	virtual void OnDied();
+	virtual FTransform GetProjectileSpawnTransform();
 
 	void RotationTimelineUpdate(const float Alpha);
 	void MovementTimelineUpdate(const float Alpha);
 	void MovementByTimelineFinished();
+
+	bool IsRangeUnit();
+
+	float PlayAnimMontage(UAnimMontage *AnimMontage, float InPlayRate = 1.0f, FName StartSectionName = "");
 
 	FORCEINLINE bool IsUnitDead() const { return CurrentHP <= 0; }
 	FORCEINLINE bool IsStuned() const { return bIsStuned; }
@@ -92,15 +104,30 @@ public:
 	FORCEINLINE UAnimSequence *GetIdleAnim() const { return IdleAnim; }
 	FORCEINLINE UAnimSequence *GetDieAnim() const { return DieAnim; }
 	FORCEINLINE USceneComponent *GetCameraLookLocation() const { return CameraLookLocation; }
+	FORCEINLINE USceneComponent *GetProjectileHitLocation() const { return ProjectileHitLocation; }
+	FORCEINLINE TSubclassOf<AProjectileBase> GetProjectileClass() const { return Projectile; }
 	FORCEINLINE FText GetTitle() const { return Title; }
+	FORCEINLINE USkeletalMeshComponent *GetSkeletalMesh() const { return SkeletalMesh; }
+	FORCEINLINE UArrowComponent *GetAttackerLocation() const { return AttackerLocation; }
 	FORCEINLINE UTexture2D *GetThumbnail() const { return Thumbnail; }
+	FORCEINLINE UAnimMontage *GetItemUseAnimMontage() const { return ItemUseAnimMontage; }
+	FORCEINLINE UAnimMontage *GetAttackAnimMontage() const { return AttackAnimMontage; }
+	FORCEINLINE UAnimInstance *GetAnimInstance() const { return AnimInstance; }
+	FORCEINLINE FTransform GetSpawnedTransform() const { return SpawnedTransform; }
+	FORCEINLINE FVector GetInitialLocation() const { return InitialLocation; }
+	FORCEINLINE AUnitBase *GetCurrentTarget() const { return CurrentTarget.Get(); }
 
-
-	FORCEINLINE UAnimMontage * GetItemUseAnimMontage() const { return ItemUseAnimMontage; }
+	FORCEINLINE void SetLevel(int Level_l) {Level = Level_l;}
+	void SetBattle(ABattleBase * Battle_l);
 
 protected:
+	virtual void BeginPlay() override;
+
+	UFUNCTION()
+	void OnBattleRemovedHandler();
+
 	UPROPERTY(VisibleDefaultsOnly, Category = "Components")
-	class USkeletalMeshComponent *SkeletalMesh;
+	USkeletalMeshComponent *SkeletalMesh;
 	UPROPERTY(VisibleDefaultsOnly, Category = "Components")
 	class UWidgetComponent *TargetIconWidget;
 	UPROPERTY(VisibleDefaultsOnly, Category = "Components")
@@ -114,7 +141,7 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, Category = "Components")
 	USpringArmComponent *AttackerLocationSpringArm;
 	UPROPERTY(VisibleDefaultsOnly, Category = "Components")
-	class UArrowComponent *AttackerLocation;
+	UArrowComponent *AttackerLocation;
 	UPROPERTY(VisibleDefaultsOnly, Category = "Components")
 	USpringArmComponent *BackCameraSpringArm;
 	UPROPERTY(VisibleDefaultsOnly, Category = "Components")
@@ -163,10 +190,17 @@ protected:
 	int MaxLevel;
 	UPROPERTY(EditDefaultsOnly)
 	float MoveSpeed;
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<AProjectileBase> Projectile;
+
+	UPROPERTY()
+	UAnimInstance *AnimInstance;
 
 	TWeakObjectPtr<ABattleController> BattleController;
+	TWeakObjectPtr<ABattleBase> Battle;
 	TWeakObjectPtr<AUnitBase> CurrentTarget;
 	TWeakObjectPtr<class UTargetIcon> TargetIconUI;
+	TWeakObjectPtr<AJRPG_PlayerController> PlayerController;
 
 	int MaxHP;
 	int MaxMP;
@@ -199,4 +233,6 @@ protected:
 	float MaxBlendCameraSpeed = 0.5f;
 	FTimeline RotationTimeline;
 	FTimeline MovementTimeline;
+
+	const FName ProjectileSocketName = "ProjectileSocket";
 };

@@ -2,6 +2,8 @@
 
 #include "JRPG_PlayerController.h"
 #include "JRPG_FunctionLibrary.h"
+#include "JRPG_GameInstance.h"
+#include "AudioPlayerController.h"
 #include "../Units/PlayerUnits/PlayerUnitBase.h"
 #include "../Characters/JRPG_CharacterBase.h"
 #include "../Items/Equipment/EquipmentBase.h"
@@ -15,6 +17,7 @@
 #include "../Items/Equipment/EquipmentBase.h"
 #include "../Items/UsableItems/UsableItemBase.h"
 #include "../Items/MiscItems/MiscItemBase.h"
+#include "../Battle/BattleBase.h"
 
 void AJRPG_PlayerController::SetPawn(APawn *InPawn)
 {
@@ -158,6 +161,7 @@ void AJRPG_PlayerController::OnNewCharacterPossessed()
     Possess(ExploreCharacter.Get());
     ExploreCharacter->SetAI(false);
     RefreshInteractions();
+    RefreshBattleInteractions();
     SetPartyLeaderForAICharacters();
 }
 
@@ -178,6 +182,8 @@ void AJRPG_PlayerController::SetPartyLeaderForAICharacters()
 void AJRPG_PlayerController::BeginPlay()
 {
     Super::BeginPlay();
+    UJRPG_GameInstance *GameInstance = Cast<UJRPG_GameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+    AudioController = GameInstance->AudioPlayerController(GetWorld());
     SetUnitsStartingStats();
     SetExploreCharacter();
 }
@@ -461,6 +467,21 @@ void AJRPG_PlayerController::RefreshInteractions()
     }
 }
 
+void AJRPG_PlayerController::RefreshBattleInteractions()
+{
+    TSet<UPrimitiveComponent *> OverlappingComponents;
+    ExploreCharacter->GetInteractionArea()->GetOverlappingComponents(OverlappingComponents);
+    for (auto Component : OverlappingComponents)
+    {
+        ABattleBase *InteractedBattle = Cast<ABattleBase>(Component->GetOwner());
+        if(IsValid(InteractedBattle))
+        {
+            InteractedBattle->OverlapStarted();
+            break;
+        }
+    }
+}
+
 void AJRPG_PlayerController::ClearInteractable()
 {
     Interactable->HideInteractionUI();
@@ -477,10 +498,10 @@ void AJRPG_PlayerController::AddAllUsableItemsToInventory(TMap<TSubclassOf<AUsab
 
 void AJRPG_PlayerController::OnUsableItemUsed(TSubclassOf<AUsableItemBase> UsableItemClass, int AmountToUse)
 {
-    if(!UsableItems.Contains(UsableItemClass))
+    if (!UsableItems.Contains(UsableItemClass))
         return;
     int ItemCount = UsableItems[UsableItemClass];
-    if(ItemCount - AmountToUse > 0)
+    if (ItemCount - AmountToUse > 0)
     {
         UsableItems[UsableItemClass] = ItemCount - AmountToUse;
     }
@@ -573,7 +594,7 @@ int AJRPG_PlayerController::GetItemAmount(TSubclassOf<AItemBase> Item)
     if (Item->IsChildOf(AUsableItemBase::StaticClass()))
     {
         TSubclassOf<AUsableItemBase> UsableItem = *Item;
-        if(UsableItems.Contains(UsableItem))
+        if (UsableItems.Contains(UsableItem))
         {
             Result = UsableItems[UsableItem];
         }
@@ -581,7 +602,7 @@ int AJRPG_PlayerController::GetItemAmount(TSubclassOf<AItemBase> Item)
     else if (Item->IsChildOf(AMiscItemBase::StaticClass()))
     {
         TSubclassOf<AMiscItemBase> MiscItem = *Item;
-        if(MiscItems.Contains(MiscItem))
+        if (MiscItems.Contains(MiscItem))
         {
             Result = MiscItems[MiscItem];
         }
@@ -589,7 +610,7 @@ int AJRPG_PlayerController::GetItemAmount(TSubclassOf<AItemBase> Item)
     else if (Item->IsChildOf(AEquipmentBase::StaticClass()))
     {
         TSubclassOf<AEquipmentBase> Equipment = *Item;
-        if(Equipments.Contains(Equipment))
+        if (Equipments.Contains(Equipment))
         {
             Result = Equipments[Equipment];
         }
@@ -597,7 +618,73 @@ int AJRPG_PlayerController::GetItemAmount(TSubclassOf<AItemBase> Item)
     return Result;
 }
 
+void AJRPG_PlayerController::ChangeGameState(EGameState State)
+{
+    GameState = State;
+    if (OnGameStateChanged.IsBound())
+    {
+        OnGameStateChanged.Broadcast(GameState);
+    }
+    switch (State)
+    {
+    case EGameState::Explore:
+        DisableCharacter(false);
+        SetBlockPlayerUnitState(false);
+        break;
+    case EGameState::Battle:
+        DisableCharacter(true);
+        SetBlockPlayerUnitState(true);
+        break;
+    }
+}
+
+void AJRPG_PlayerController::OnBattleOver()
+{
+    SetExploreCharacter();
+    ChangeGameState(EGameState::Explore);
+    RefreshBattleInteractions();
+    FInputModeGameOnly InputModeGameOnly;
+    SetInputMode(InputModeGameOnly);
+}
+
+void AJRPG_PlayerController::DisableCharacter(bool bIsDisabled)
+{
+    UJRPG_FunctionLibrary::SetActorDisableState(UGameplayStatics::GetPlayerPawn(GetWorld(), 0), bIsDisabled);
+}
+
+void AJRPG_PlayerController::PlaySound2DByTag(FName Tag)
+{
+    AudioController->PlaySoundByTag(Tag);
+}
+
+void AJRPG_PlayerController::UpdatePlayerUnitsData(int TotalExp, TArray<APlayerUnitBase*> AliveUnits, TArray<TSubclassOf<APlayerUnitBase>> DeadUnits)
+{
+    FPlayerUnitData PlayerUnitData;
+    for(auto Unit : AliveUnits)
+    {
+        if(TryGetUnitDataByPlayer(Unit->StaticClass(), PlayerUnitData))
+        {
+            PlayerUnitData.Exp += TotalExp / AliveUnits.Num();
+            PlayerUnitData.CurrentHP = Unit->GetCurrentHP();
+            PlayerUnitData.CurrentMP = Unit->GetCurrentMP();
+        }
+    }
+    for(const auto& DeadUnitClass : DeadUnits)
+    {
+        if(TryGetUnitDataByPlayer(DeadUnitClass, PlayerUnitData))
+        {
+            PlayerUnitData.CurrentHP = 0;
+            PlayerUnitData.CurrentMP = 0;
+        }
+        RemoveFromParty(DeadUnitClass);
+    }
+}
+
+void AJRPG_PlayerController::RemoveFromParty(TSubclassOf<APlayerUnitBase> Unit)
+{
+    PartyMembers.Remove(Unit);
+}
+
 void AJRPG_PlayerController::UpdateQuest(TSubclassOf<AQuestBase> Quest, int Steps, bool bOverrideProgress, bool bIgnoreNotification)
 {
-
 }

@@ -25,6 +25,8 @@ class JRPG_LEARN_API AUsableItemBase : public AItemBase
 
 	virtual void Use(ABattleController*, AJRPG_PlayerController*, bool, AUnitBase*, TSubclassOf<APlayerUnitBase>);
 
+	FORCEINLINE EUnitFilter GetUnitFilter() const {return UnitFilter;}
+
 	protected:
 
 	virtual void OnUsedInBattle(AUnitBase*, TSubclassOf<APlayerUnitBase>);

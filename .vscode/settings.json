@@ -1,8 +1,9 @@
 {
 	"files.exclude": {
-		"D:/Git2/UEPractice/JRPG_Learn/ue4/JRPG_Learn/.vscode": true,
-		"D:/Git2/UEPractice/JRPG_Learn/ue4/JRPG_Learn/Content": true,
-		"D:/Git2/UEPractice/JRPG_Learn/ue4/JRPG_Learn/Intermediate": true,
-		"D:/Git2/UEPractice/JRPG_Learn/ue4/JRPG_Learn/Saved": true
+		"D:/Git2/UnityProjects/GitHub/JRPG_Learn/.git": true,
+		"D:/Git2/UnityProjects/GitHub/JRPG_Learn/.vscode": true,
+		"D:/Git2/UnityProjects/GitHub/JRPG_Learn/Content": true,
+		"D:/Git2/UnityProjects/GitHub/JRPG_Learn/Intermediate": true,
+		"D:/Git2/UnityProjects/GitHub/JRPG_Learn/Saved": true
 	}
 }

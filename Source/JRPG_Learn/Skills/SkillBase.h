@@ -17,29 +17,29 @@ class JRPG_LEARN_API ASkillBase : public AActor
 public:
 	FOnSkillUsedSignature OnSkillUsed;
 
-	UFUNCTION(BlueprintCallable)
-	void UseSkill();
+	virtual void UseSkill();
 
 	FORCEINLINE int GetManaRequired() const { return ManaRequired; }
 	FORCEINLINE FText GetName() { return Name; }
 	FORCEINLINE FText GetShortDescription() { return ShortDescription; }
 	FORCEINLINE UTexture2D *GetIcon() { return Icon; }
 
-	FORCEINLINE void SetPlayerController(AJRPG_PlayerController *Controller) { PlayerController = Controller; }
+	void SetPlayerController(AJRPG_PlayerController *Controller);
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+
+	UPROPERTY(EditDefaultsOnly)
 	FText Name;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly)
 	FText ShortDescription;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly)
 	FText FullDescription;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly)
 	UTexture2D *Icon;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly)
 	int ManaRequired;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly)
 	bool CanUseInExplore;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	AJRPG_PlayerController *PlayerController;
+
+	TWeakObjectPtr<AJRPG_PlayerController> PlayerController;
 };

@@ -2,17 +2,19 @@
 
 
 #include "UnitSpawnLocation.h"
-#include "Components/SphereComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "Components/ArrowComponent.h"
+#include "BattleBase.h"
 
-// Sets default values
-AUnitSpawnLocation::AUnitSpawnLocation()
+void AUnitSpawnLocation::Init(ABattleBase *Battle_l)
 {
-	USphereComponent* Sphere = CreateDefaultSubobject<USphereComponent>(TEXT("Sphere"));
-	Sphere->SetCollisionProfileName(TEXT("NoCollision"));
-	Sphere->bHiddenInGame = 1;
-	RootComponent = Sphere;
-	UArrowComponent* Arrow = CreateDefaultSubobject<UArrowComponent>(TEXT("Arrow"));
-	Arrow->ArrowColor = FColor::Black;
-	Arrow->SetupAttachment(RootComponent);
+	Battle = TWeakObjectPtr<ABattleBase>(Battle_l);
+	FScriptDelegate OnDestoyedDelegate;
+	OnDestoyedDelegate.BindUFunction(this, "OnBattleDestroyedHandler");
+	Battle->OnDestroyed.Add(OnDestoyedDelegate);
+}
+
+void AUnitSpawnLocation::OnBattleDestroyedHandler(AActor* DestroyedActor)
+{
+	Destroy();
 }

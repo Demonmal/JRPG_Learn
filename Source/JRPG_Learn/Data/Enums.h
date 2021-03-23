@@ -112,7 +112,7 @@ enum class EBattleResult : uint8
 {
 	PlayerWon,
 	EnemyWon,
-	Fled
+	Flee
 };
 
 UCLASS()

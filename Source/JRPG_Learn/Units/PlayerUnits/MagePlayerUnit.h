@@ -13,5 +13,5 @@ UCLASS()
 class JRPG_LEARN_API AMagePlayerUnit : public APlayerUnitBase
 {
 	GENERATED_BODY()
-	
+
 };

@@ -3,6 +3,7 @@
 
 #include "JRPG_GameInstance.h"
 #include "AudioPlayerController.h"
+#include "../Battle/BattleController.h"
 #include "Engine/World.h"
 
 void UJRPG_GameInstance::LoadGame()
@@ -20,4 +21,9 @@ AAudioPlayerController *UJRPG_GameInstance::AudioPlayerController(UWorld* World)
     return IsValid(AudioPlayerControllerInstance) ? 
            AudioPlayerControllerInstance : 
            AudioPlayerControllerInstance = World->SpawnActor<AAudioPlayerController>(AAudioPlayerController::StaticClass());
+}
+
+void UJRPG_GameInstance::SetBattleControllerInstance(ABattleController *Controller) 
+{
+    BattleControllerInstance = TWeakObjectPtr<ABattleController>(Controller);
 }

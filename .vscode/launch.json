@@ -5,7 +5,7 @@
 			"name": "JRPG_Learn (Debug)",
 			"request": "launch",
 			"preLaunchTask": "JRPG_Learn Win64 Debug Build",
-			"program": "D:\\Git2\\UEPractice\\JRPG_Learn\\ue4\\JRPG_Learn\\Binaries\\Win64\\UE4-Win64-Debug.exe",
+			"program": "D:\\Git2\\UnityProjects\\GitHub\\JRPG_Learn\\Binaries\\Win64\\UE4-Win64-Debug.exe",
 			"args": [
 			],
 			"cwd": "C:\\Program Files\\Epic Games\\UE_4.24",
@@ -18,7 +18,7 @@
 			"name": "JRPG_Learn (DebugGame)",
 			"request": "launch",
 			"preLaunchTask": "JRPG_Learn Win64 DebugGame Build",
-			"program": "D:\\Git2\\UEPractice\\JRPG_Learn\\ue4\\JRPG_Learn\\Binaries\\Win64\\UE4-Win64-DebugGame.exe",
+			"program": "D:\\Git2\\UnityProjects\\GitHub\\JRPG_Learn\\Binaries\\Win64\\UE4-Win64-DebugGame.exe",
 			"args": [
 			],
 			"cwd": "C:\\Program Files\\Epic Games\\UE_4.24",
@@ -31,7 +31,7 @@
 			"name": "JRPG_Learn (Development)",
 			"request": "launch",
 			"preLaunchTask": "JRPG_Learn Win64 Development Build",
-			"program": "D:\\Git2\\UEPractice\\JRPG_Learn\\ue4\\JRPG_Learn\\Binaries\\Win64\\UE4.exe",
+			"program": "D:\\Git2\\UnityProjects\\GitHub\\JRPG_Learn\\Binaries\\Win64\\UE4.exe",
 			"args": [
 			],
 			"cwd": "C:\\Program Files\\Epic Games\\UE_4.24",
@@ -44,7 +44,7 @@
 			"name": "JRPG_Learn (Shipping)",
 			"request": "launch",
 			"preLaunchTask": "JRPG_Learn Win64 Shipping Build",
-			"program": "D:\\Git2\\UEPractice\\JRPG_Learn\\ue4\\JRPG_Learn\\Binaries\\Win64\\UE4-Win64-Shipping.exe",
+			"program": "D:\\Git2\\UnityProjects\\GitHub\\JRPG_Learn\\Binaries\\Win64\\UE4-Win64-Shipping.exe",
 			"args": [
 			],
 			"cwd": "C:\\Program Files\\Epic Games\\UE_4.24",
@@ -57,7 +57,7 @@
 			"name": "JRPG_Learn (Test)",
 			"request": "launch",
 			"preLaunchTask": "JRPG_Learn Win64 Test Build",
-			"program": "D:\\Git2\\UEPractice\\JRPG_Learn\\ue4\\JRPG_Learn\\Binaries\\Win64\\UE4-Win64-Test.exe",
+			"program": "D:\\Git2\\UnityProjects\\GitHub\\JRPG_Learn\\Binaries\\Win64\\UE4-Win64-Test.exe",
 			"args": [
 			],
 			"cwd": "C:\\Program Files\\Epic Games\\UE_4.24",
@@ -72,7 +72,7 @@
 			"preLaunchTask": "JRPG_LearnEditor Win64 Debug Build",
 			"program": "C:\\Program Files\\Epic Games\\UE_4.24\\Engine\\Binaries\\Win64\\UE4Editor-Win64-Debug.exe",
 			"args": [
-				"D:\\Git2\\UEPractice\\JRPG_Learn\\ue4\\JRPG_Learn\\JRPG_Learn.uproject"
+				"D:\\Git2\\UnityProjects\\GitHub\\JRPG_Learn\\JRPG_Learn.uproject"
 			],
 			"cwd": "C:\\Program Files\\Epic Games\\UE_4.24",
 			"stopAtEntry": false,
@@ -86,7 +86,7 @@
 			"preLaunchTask": "JRPG_LearnEditor Win64 DebugGame Build",
 			"program": "C:\\Program Files\\Epic Games\\UE_4.24\\Engine\\Binaries\\Win64\\UE4Editor-Win64-DebugGame.exe",
 			"args": [
-				"D:\\Git2\\UEPractice\\JRPG_Learn\\ue4\\JRPG_Learn\\JRPG_Learn.uproject"
+				"D:\\Git2\\UnityProjects\\GitHub\\JRPG_Learn\\JRPG_Learn.uproject"
 			],
 			"cwd": "C:\\Program Files\\Epic Games\\UE_4.24",
 			"stopAtEntry": false,
@@ -100,7 +100,7 @@
 			"preLaunchTask": "JRPG_LearnEditor Win64 Development Build",
 			"program": "C:\\Program Files\\Epic Games\\UE_4.24\\Engine\\Binaries\\Win64\\UE4Editor.exe",
 			"args": [
-				"D:\\Git2\\UEPractice\\JRPG_Learn\\ue4\\JRPG_Learn\\JRPG_Learn.uproject"
+				"D:\\Git2\\UnityProjects\\GitHub\\JRPG_Learn\\JRPG_Learn.uproject"
 			],
 			"cwd": "C:\\Program Files\\Epic Games\\UE_4.24",
 			"stopAtEntry": false,
@@ -117,7 +117,7 @@
 			"args": [
 				"-projectfiles",
 				"-vscode",
-				"-project=\"D:\\Git2\\UEPractice\\JRPG_Learn\\ue4\\JRPG_Learn\\JRPG_Learn.uproject\"",
+				"-project=\"D:\\Git2\\UnityProjects\\GitHub\\JRPG_Learn\\JRPG_Learn.uproject\"",
 				"-game",
 				"-engine"
 			],

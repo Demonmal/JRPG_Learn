@@ -9,6 +9,7 @@
 
 class UJRPG_SaveGame;
 class AAudioPlayerController;
+class ABattleController;
 
 UCLASS()
 class JRPG_LEARN_API UJRPG_GameInstance : public UGameInstance
@@ -22,6 +23,10 @@ class JRPG_LEARN_API UJRPG_GameInstance : public UGameInstance
 
 	UFUNCTION()
 	AAudioPlayerController *AudioPlayerController(class UWorld* World);
+	UFUNCTION()
+	void SetBattleControllerInstance(ABattleController *Controller);
+
+	FORCEINLINE ABattleController *GetBattleController() const {return BattleControllerInstance.Get();}
 
 	FORCEINLINE FString GetSlotName() const {return SlotName;}
 	FORCEINLINE UJRPG_SaveGame* GetSaveGameObject() const {return SaveGameObject;}
@@ -35,6 +40,8 @@ class JRPG_LEARN_API UJRPG_GameInstance : public UGameInstance
 
 	UPROPERTY()
 	AAudioPlayerController *AudioPlayerControllerInstance;
+	UPROPERTY()
+	TWeakObjectPtr<ABattleController> BattleControllerInstance;
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<AAudioPlayerController> AudioPlayerControllerClass;
 

@@ -29,9 +29,9 @@ class JRPG_LEARN_API UItemButton : public UUserWidget
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	UTextBlock* AmountText;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<AItemBase> Item;
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int Amount;
 
 	UFUNCTION(BlueprintImplementableEvent)

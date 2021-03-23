@@ -12,7 +12,7 @@
 
 void ABluePotion::OnUsedInBattle(AUnitBase *Unit, TSubclassOf<APlayerUnitBase> PlayerUnitClass)
 {
-    Unit->PlayAnimationMontage(Unit->GetItemUseAnimMontage());
+    Unit->PlayAnimMontage(Unit->GetItemUseAnimMontage());
     Unit->IncreaseMP(UKismetMathLibrary::FTrunc(Unit->GetMaxMP() * ManaRestorePercent));
     FLatentActionInfo LatentActionInfo;
     UKismetSystemLibrary::Delay(GetWorld(), 1.5f, LatentActionInfo);

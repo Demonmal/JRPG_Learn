@@ -162,3 +162,10 @@ TArray<UClass *> UJRPG_FunctionLibrary::GetAllEquipmentClasses(const FPlayerUnit
     }
     return EquipmentClasses;
 }
+
+void UJRPG_FunctionLibrary::SetActorDisableState(AActor *Actor, bool bDisableState)
+{
+    Actor->SetActorHiddenInGame(bDisableState);
+    Actor->SetActorEnableCollision(bDisableState);
+    Actor->SetActorTickEnabled(bDisableState);
+}

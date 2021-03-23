@@ -39,4 +39,6 @@ public:
 	static int GetLevel(const int &Exp, const float &Exponent, const int &MaxLevel);
 	UFUNCTION(BlueprintCallable)
 	static TArray<UClass*> GetAllEquipmentClasses(const FPlayerUnitData& Data);
+	UFUNCTION(BlueprintCallable)
+	static void SetActorDisableState(AActor *Actor, bool bDisableState);
 };
