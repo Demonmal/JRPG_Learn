@@ -92,6 +92,8 @@ private:
 	TMap<TSubclassOf<APlayerUnitBase>, int> GetLeveledUpUnits();
 
 	UFUNCTION()
+	void OnTransitionEndedHandler();
+	UFUNCTION()
 	void OnTurnEndedHandler();
 	UFUNCTION()
 	void OnUnitMovedToTargetHandler();
@@ -178,10 +180,11 @@ private:
 	UBattleUI *BattleUI;
 	UPROPERTY()
 	TArray<AUnitBase *> ReadyToAttackUnits;
+	UPROPERTY()
+	ABattleTransitionBase *CurrentBattleTransition;
 
 	TWeakObjectPtr<AJRPG_PlayerController> PlayerController;
 	TWeakObjectPtr<ABattleBase> CurrentBattle;
-	TWeakObjectPtr<ABattleTransitionBase> CurrentBattletransition;
 	TWeakObjectPtr<AUnitBase> CurrentAttackingUnit;
 	TWeakObjectPtr<AUnitBase> CurrentTargetUnit;
 	TWeakObjectPtr<class AUsableItemBase> CurrentUsableItem;

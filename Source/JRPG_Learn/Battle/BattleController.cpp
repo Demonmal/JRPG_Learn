@@ -76,6 +76,7 @@ void ABattleController::PlayBattleTheme()
 
 void ABattleController::InitBattle(ABattleBase *Battle, AJRPG_PlayerController *Controller)
 {
+	UE_LOG(LogTemp, Log, TEXT("InitBattle"))
 	CurrentBattle = TWeakObjectPtr<ABattleBase>(Battle);
 	PlayerController = TWeakObjectPtr<AJRPG_PlayerController>(Controller);
 	ExploreCharacter = TWeakObjectPtr<APawn>(Controller->GetExploreCharacter());
@@ -727,6 +728,21 @@ void ABattleController::Flee(APlayerUnitBase *PlayerUnit)
 
 void ABattleController::StartTransition()
 {
+	FTransform SpawnTransform;
+	CurrentBattleTransition = GetWorld()->SpawnActor<ABattleTransitionBase>(GetBattleTransitionClass(), SpawnTransform);
+	CurrentBattleTransition->SetPlayerController(PlayerController.Get());
+	CurrentBattleTransition->SetBattle(CurrentBattle.Get());
+	CurrentBattleTransition->OnTransitionEnded.AddUObject(this, &ABattleController::OnTransitionEndedHandler);
+	PlayerController->ChangeGameState(EGameState::BattleTransition);
+	CurrentBattleTransition->StartTransition();
+	UKismetSystemLibrary::Delay(GetWorld(), 0.1f, LatentActionInfo);
+	SwitchToBattleMode();
+}
+
+void ABattleController::OnTransitionEndedHandler()
+{
+	CurrentBattleTransition->Destroy();
+	StartBattle();
 }
 
 void ABattleController::ChangeMapForBattle()

@@ -196,20 +196,21 @@ bool AJRPG_PlayerController::TryGetUnitDataByPlayer(TSubclassOf<APlayerUnitBase>
         Result = true;
         PlayerUnitData = PlayerUnits[UnitClass];
     }
+    else
     {
-        UE_LOG(LogTemp, Warning, TEXT("AJRPG_PlayerController::TryGetUnitDataByPlayer PlayerUnits doesn't contain such unit"));
+        UE_LOG(LogTemp, Warning, TEXT("AJRPG_PlayerController::TryGetUnitDataByPlayer PlayerUnits doesn't contain such unit: %s"), *UnitClass->GetName());
     }
     return Result;
 }
 
 void AJRPG_PlayerController::SetUnitsStartingStats()
 {
-    for (auto &pair : PlayerUnits)
+    for (auto &Pair : PlayerUnits)
     {
         int Level;
-        FUnitStats Stats = UJRPG_FunctionLibrary::GetPlayerUnitStatsFromData(pair.Key, pair.Value, Level);
-        pair.Value.CurrentHP = Stats.MaxHP;
-        pair.Value.CurrentMP = Stats.MaxMP;
+        FUnitStats Stats = UJRPG_FunctionLibrary::GetPlayerUnitStatsFromData(Pair.Key, Pair.Value, Level);
+        Pair.Value.CurrentHP = Stats.MaxHP;
+        Pair.Value.CurrentMP = Stats.MaxMP;
     }
 }
 

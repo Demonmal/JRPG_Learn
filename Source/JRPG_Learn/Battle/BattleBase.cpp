@@ -59,12 +59,13 @@ void ABattleBase::InitBattle()
 void ABattleBase::SpawnPlayerUnits()
 {
 	PlayerUnitLevels.Empty();
+	UE_LOG(LogTemp, Log, TEXT("SpawnPlayerUnits"))
 	TArray<TSubclassOf<APlayerUnitBase>> PartyMembers = PlayerController->GetPartyMembers();
-	for (int i {0}; i < PartyMembers.Num(); i++)
+	for (int i{0}; i < PartyMembers.Num(); i++)
 	{
-		if(i < PlayerSpawnLocations.Num() && IsValid(PlayerSpawnLocations[i]))
+		if (i < PlayerSpawnLocations.Num() && IsValid(PlayerSpawnLocations[i]))
 		{
-			APlayerUnitBase * PlayerDefault = Cast<APlayerUnitBase>(PartyMembers[i]->GetDefaultObject());
+			APlayerUnitBase *PlayerDefault = Cast<APlayerUnitBase>(PartyMembers[i]->GetDefaultObject());
 			FPlayerUnitData PlayerUnitData;
 			PlayerController->TryGetUnitDataByPlayer(PartyMembers[i], PlayerUnitData);
 			int Level = UJRPG_FunctionLibrary::GetLevel(PlayerUnitData.Exp, PlayerDefault->GetExpExponent(), PlayerDefault->GetMaxLevel());
@@ -86,6 +87,7 @@ void ABattleBase::SpawnEnemyUnits()
 	UsableItemDrops.Empty();
 	TotalExpReward = 0;
 	TotalGoldReward = 0;
+	UE_LOG(LogTemp, Log, TEXT("SpawnEnemyUnits"))
 	for (int i{0}; i < EnemySpawnLocations.Num(); i++)
 	{
 		EnemySpawnLocations[i]->Init(this);
@@ -114,11 +116,11 @@ void ABattleBase::SpawnEnemyUnits()
 
 void ABattleBase::DropUsableItems(AEnemyUnitBase *Unit)
 {
-	for(const auto& Pair : Unit->GetUsableItemDrops())
+	for (const auto &Pair : Unit->GetUsableItemDrops())
 	{
-		if(Pair.Value >= UKismetMathLibrary::RandomFloatInRange(0.0f, 100.0f))
+		if (Pair.Value >= UKismetMathLibrary::RandomFloatInRange(0.0f, 100.0f))
 		{
-			if(UsableItemDrops.Contains(Pair.Key))
+			if (UsableItemDrops.Contains(Pair.Key))
 			{
 				UsableItemDrops[Pair.Key] += 1;
 			}
@@ -132,11 +134,11 @@ void ABattleBase::DropUsableItems(AEnemyUnitBase *Unit)
 
 void ABattleBase::DropMiscItems(AEnemyUnitBase *Unit)
 {
-	for(const auto& Pair : Unit->GetMiscItemDrops())
+	for (const auto &Pair : Unit->GetMiscItemDrops())
 	{
-		if(Pair.Value >= UKismetMathLibrary::RandomFloatInRange(0.0f, 100.0f))
+		if (Pair.Value >= UKismetMathLibrary::RandomFloatInRange(0.0f, 100.0f))
 		{
-			if(MiscItemDrops.Contains(Pair.Key))
+			if (MiscItemDrops.Contains(Pair.Key))
 			{
 				MiscItemDrops[Pair.Key] += 1;
 			}
@@ -150,11 +152,11 @@ void ABattleBase::DropMiscItems(AEnemyUnitBase *Unit)
 
 void ABattleBase::DropEquipment(AEnemyUnitBase *Unit)
 {
-	for(const auto& Pair : Unit->GetEquipmentDrops())
+	for (const auto &Pair : Unit->GetEquipmentDrops())
 	{
-		if(Pair.Value >= UKismetMathLibrary::RandomFloatInRange(0.0f, 100.0f))
+		if (Pair.Value >= UKismetMathLibrary::RandomFloatInRange(0.0f, 100.0f))
 		{
-			if(EquipmentDrops.Contains(Pair.Key))
+			if (EquipmentDrops.Contains(Pair.Key))
 			{
 				EquipmentDrops[Pair.Key] += 1;
 			}
@@ -193,15 +195,15 @@ void ABattleBase::OnPlayerUnitDiedHandler(AUnitBase *Unit)
 	TSubclassOf<APlayerUnitBase> PlayerUnitClass = Unit->StaticClass();
 	DeadPlayerUnits.Add(PlayerUnitClass, Unit->GetSpawnedTransform());
 	FPlayerUnitData PlayerUnitData;
-	if(PlayerController->TryGetUnitDataByPlayer(PlayerUnitClass, PlayerUnitData))
+	if (PlayerController->TryGetUnitDataByPlayer(PlayerUnitClass, PlayerUnitData))
 	{
 		PlayerUnitData.CurrentHP = 0;
 		PlayerUnitData.CurrentMP = 0;
 	}
 	PlayerUnits.Remove(Cast<APlayerUnitBase>(Unit));
-	if(PlayerUnits.Num() == 0)
+	if (PlayerUnits.Num() == 0)
 	{
-		if(OnBattleOver.IsBound())
+		if (OnBattleOver.IsBound())
 		{
 			OnBattleOver.Broadcast(EBattleResult::EnemyWon);
 		}
@@ -211,9 +213,9 @@ void ABattleBase::OnPlayerUnitDiedHandler(AUnitBase *Unit)
 void ABattleBase::OnEnemyUnitDiedHandler(AUnitBase *Unit)
 {
 	EnemyUnits.Remove(Cast<AEnemyUnitBase>(Unit));
-	if(EnemyUnits.Num() == 0)
+	if (EnemyUnits.Num() == 0)
 	{
-		if(OnBattleOver.IsBound())
+		if (OnBattleOver.IsBound())
 		{
 			OnBattleOver.Broadcast(EBattleResult::PlayerWon);
 		}
@@ -300,16 +302,16 @@ FOffLevelBattleData ABattleBase::GetOffLevelBattleData()
 	return OffLevelBattleData;
 }
 
-bool ABattleBase::TryGetPlayerUnitLevel(TSubclassOf<APlayerUnitBase> UnitClass, int& Level)
+bool ABattleBase::TryGetPlayerUnitLevel(TSubclassOf<APlayerUnitBase> UnitClass, int &Level)
 {
 	bool Result = false;
-    if (PlayerUnitLevels.Contains(UnitClass))
-    {
-        Result = true;
-        Level = PlayerUnitLevels[UnitClass];
-    }
-    {
-        UE_LOG(LogTemp, Warning, TEXT("ABattleBase::TryGetPlayerUnitLevel PlayerUnitLevels doesn't contain such unit"));
-    }
-    return Result;
+	if (PlayerUnitLevels.Contains(UnitClass))
+	{
+		Result = true;
+		Level = PlayerUnitLevels[UnitClass];
+	}
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ABattleBase::TryGetPlayerUnitLevel PlayerUnitLevels doesn't contain such unit"));
+	}
+	return Result;
 }

@@ -6,6 +6,9 @@
 #include "GameFramework/Actor.h"
 #include "BattleTransitionBase.generated.h"
 
+class AJRPG_PlayerController;
+class ABattleBase;
+
 DECLARE_MULTICAST_DELEGATE(OnTransitionEndedSignature)
 
 UCLASS()
@@ -19,8 +22,11 @@ class JRPG_LEARN_API ABattleTransitionBase : public AActor
 
 	void StartTransition();
 
+	void SetPlayerController(AJRPG_PlayerController *);
+	void SetBattle(ABattleBase *);
+
 	protected:
 
-	TWeakObjectPtr<class AJRPG_PlayerController> PlayerController;
-	TWeakObjectPtr<class ABattleBase> Battle;
+	TWeakObjectPtr<AJRPG_PlayerController> PlayerController;
+	TWeakObjectPtr<ABattleBase> Battle;
 };
