@@ -55,7 +55,7 @@ protected:
 	UPROPERTY(EditAnywhere)
 	FOffLevelBattleData OverrideOffLevelBattleData;
 	UPROPERTY(EditAnywhere)
-	float AcceptanceRadius = 50.f;
+	float AcceptanceRadius = 15.0f;
 
 	UPROPERTY()
 	AInteractionDetector *InteractionDetector;
@@ -66,4 +66,7 @@ protected:
 	FTimeline WaitTimeline;
 	TWeakObjectPtr<AJRPG_PlayerController> PlayerController;
 	TWeakObjectPtr<class UNavigationSystemV1> NavSystem;
+
+	const float MinWaitPlayRate = 0.1f;
+	const float MaxWaitPlayRate = 0.25f;
 };

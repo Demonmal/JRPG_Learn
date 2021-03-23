@@ -235,7 +235,6 @@ void AUnitBase::SwitchToFrontCamera(bool bIsInstant)
 void AUnitBase::SetTargetIconVisibility(bool bVisibilityState)
 {
 	TargetIconWidget->SetVisibility(bVisibilityState);
-	//TargetIconUI->SetVisibility(bVisibilityState);
 	if (OnTargetIconShown.IsBound())
 	{
 		OnTargetIconShown.Broadcast(bVisibilityState);

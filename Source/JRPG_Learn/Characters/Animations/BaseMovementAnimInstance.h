@@ -25,5 +25,5 @@ class JRPG_LEARN_API UBaseMovementAnimInstance : public UAnimInstance
 
 	private:
 
-	TWeakObjectPtr<class AJRPG_CharacterBase> CachedCharacter;
+	TWeakObjectPtr<ACharacter> CachedCharacter;
 };

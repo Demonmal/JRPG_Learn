@@ -17,8 +17,8 @@ class JRPG_LEARN_API UBaseBattleAnim : public UAnimInstance
 
 	virtual void NativeBeginPlay() override;
 
-	UPROPERTY(BlueprintReadOnly)
-	bool bIsDead;
+	UPROPERTY(BlueprintReadWrite)
+	bool bIsDead = false;
 
 	UPROPERTY(BlueprintReadOnly)
 	UAnimSequenceBase* IdleAnim;

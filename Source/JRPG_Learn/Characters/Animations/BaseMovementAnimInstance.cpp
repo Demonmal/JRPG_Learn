@@ -6,7 +6,7 @@
 void UBaseMovementAnimInstance::NativeBeginPlay()
 {
     Super::NativeBeginPlay();
-    CachedCharacter = Cast<AJRPG_CharacterBase>(TryGetPawnOwner());
+    CachedCharacter = Cast<ACharacter>(TryGetPawnOwner());
 }
 
 void UBaseMovementAnimInstance::NativeUpdateAnimation(float DeltaSeconds)

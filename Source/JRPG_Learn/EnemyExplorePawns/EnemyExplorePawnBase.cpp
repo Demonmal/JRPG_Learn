@@ -17,6 +17,7 @@
 // Sets default values
 AEnemyExplorePawnBase::AEnemyExplorePawnBase()
 {
+	PrimaryActorTick.bCanEverTick = 1;
 	InteractionActor = CreateDefaultSubobject<UChildActorComponent>("InteractionActor");
 	InteractionActor->SetupAttachment(RootComponent);
 
@@ -30,9 +31,12 @@ void AEnemyExplorePawnBase::BeginPlay()
 	AIController = Cast<AAIController>(GetController());
 	NavSystem = FNavigationSystem::GetCurrent<UNavigationSystemV1>(GetWorld());
 	FOnTimelineEventStatic WaitTimelineFinish;
+	FOnTimelineFloatStatic MovementTimelineUpdate;
 	WaitTimelineFinish.BindUObject(this, &AEnemyExplorePawnBase::OnWaitFinished);
 	WaitTimeline.SetTimelineFinishedFunc(WaitTimelineFinish);
-	WaitTimeline.SetFloatCurve(WaitTimelineCurve, "WaitCurve");
+	WaitTimeline.AddInterpFloat(WaitTimelineCurve, MovementTimelineUpdate);
+	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+	WaitTimeline.SetPlayRate(UKismetMathLibrary::RandomFloatInRange(MinWaitPlayRate, MaxWaitPlayRate));
 	EnableAI();
 	InteractionDetector = Cast<AInteractionDetector>(InteractionActor->GetChildActor());
 	InteractionDetector->OnInteracted.AddUObject(this, &AEnemyExplorePawnBase::OnInteractedHandler);
@@ -41,11 +45,11 @@ void AEnemyExplorePawnBase::BeginPlay()
 	PlayerController->OnGameStateChanged.AddUObject(this, &AEnemyExplorePawnBase::OnGameStateChangedHandler);
 }
 
- void AEnemyExplorePawnBase::Tick(float DeltaSeconds)
- {
+void AEnemyExplorePawnBase::Tick(float DeltaSeconds)
+{
 	Super::Tick(DeltaSeconds);
 	WaitTimeline.TickTimeline(DeltaSeconds);
- }
+}
 
 void AEnemyExplorePawnBase::StartBattle()
 {
@@ -58,7 +62,7 @@ void AEnemyExplorePawnBase::StartBattle()
 void AEnemyExplorePawnBase::DisableAI()
 {
 	StopAI();
-	if(!bIsStartingBattle)
+	if (!bIsStartingBattle)
 	{
 		UJRPG_FunctionLibrary::SetActorDisableState(this, true);
 	}
@@ -67,9 +71,6 @@ void AEnemyExplorePawnBase::DisableAI()
 void AEnemyExplorePawnBase::EnableAI()
 {
 	UJRPG_FunctionLibrary::SetActorDisableState(this, false);
-	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
-	float PlayRate = 1.0f / UKismetMathLibrary::RandomFloatInRange(2.0f, 5.0f);
-	WaitTimeline.SetPlayRate(PlayRate);
 	WaitTimeline.PlayFromStart();
 }
 
@@ -83,7 +84,7 @@ void AEnemyExplorePawnBase::OnWaitFinished()
 {
 	FVector Origin = Battle->GetActorLocation();
 	FNavLocation RandomPoint;
-	if(NavSystem->GetRandomReachablePointInRadius(Origin, Battle->GetRadius() * 50.0f, RandomPoint))
+	if (NavSystem->GetRandomReachablePointInRadius(Origin, Battle->GetRadius() * 50.0f, RandomPoint))
 	{
 		FAIMoveRequest MoveRequest;
 		MoveRequest.SetGoalLocation(RandomPoint.Location);
