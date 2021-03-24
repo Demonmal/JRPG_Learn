@@ -27,6 +27,7 @@ AUnitBase::AUnitBase()
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
 
 	SkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMesh"));
+	SkeletalMesh->PrimaryComponentTick.TickGroup = TG_PrePhysics;
 	SkeletalMesh->SetupAttachment(RootComponent);
 
 	TargetIconWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("TargetIconWidget"));
@@ -71,6 +72,7 @@ AUnitBase::AUnitBase()
 
 void AUnitBase::BeginPlay()
 {
+	Super::BeginPlay();
 	AnimInstance = (SkeletalMesh)? SkeletalMesh->GetAnimInstance() : nullptr; 
 	PlayerController = Cast<AJRPG_PlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 }
@@ -84,6 +86,7 @@ void AUnitBase::Tick(float DeltaSeconds)
 
 void AUnitBase::InitUnit(ABattleController *Controller)
 {
+	UE_LOG(LogTemp, Log, TEXT("AUnitBase::InitUnit"))
 	BattleController = Controller;
 	SetUnitStats();
 	if (OnActionTimeAdded.IsBound())
@@ -91,6 +94,7 @@ void AUnitBase::InitUnit(ABattleController *Controller)
 		OnActionTimeAdded.Broadcast(0);
 	}
 	PlayAnimMontage(IntroAnimMontage);
+	TargetIconWidget->InitWidget();
 	TargetIconUI = Cast<UTargetIcon>(TargetIconWidget);
 	FTransform MeshTransform = SkeletalMesh->GetComponentTransform();
 	InitialLocation = MeshTransform.GetLocation();
@@ -205,7 +209,7 @@ void AUnitBase::MovementByTimelineFinished()
 void AUnitBase::AdjustAttackerLocation(AUnitBase *Unit)
 {
 	FRotator Rotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), Unit->GetActorLocation());
-	float Yaw = Rotation.Yaw + 180;
+	float Yaw = Rotation.Yaw + 180.0f;
 	AttackerLocationSpringArm->SetRelativeRotation(FRotator{0, Yaw, 0});
 }
 

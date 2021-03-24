@@ -9,14 +9,18 @@
 #include "../../Battle/BattleController.h"
 #include "../../Units/UnitBase.h"
 #include "../../Units/PlayerUnits/PlayerUnitBase.h"
+#include "TimerManager.h"
 
 void ABluePotion::OnUsedInBattle(AUnitBase *Unit, TSubclassOf<APlayerUnitBase> PlayerUnitClass)
 {
     Unit->PlayAnimMontage(Unit->GetItemUseAnimMontage());
     Unit->IncreaseMP(UKismetMathLibrary::FTrunc(Unit->GetMaxMP() * ManaRestorePercent));
-    FLatentActionInfo LatentActionInfo;
-    UKismetSystemLibrary::Delay(GetWorld(), 1.5f, LatentActionInfo);
-    AUsableItemBase::OnUsedInBattle(Unit, PlayerUnitClass);
+    FTimerDelegate TimerCallback;
+    FTimerHandle TimerHandle;
+    TimerCallback.BindLambda([&]() {
+        AUsableItemBase::OnUsedInBattle(Unit, PlayerUnitClass);
+    });
+    GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerCallback, 1.5f, false);
 }
 
 void ABluePotion::OnUsedOutsideBattle(TSubclassOf<APlayerUnitBase> PlayerUnitClass)

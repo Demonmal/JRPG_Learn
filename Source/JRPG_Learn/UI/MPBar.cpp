@@ -10,7 +10,7 @@ void UMPBar::SetUnit(AUnitBase* Unit)
 {
     CachedUnit = TWeakObjectPtr<AUnitBase>(Unit);
     CachedUnit->OnMPSet.AddUObject(this, &UMPBar::OnMPSetHandler);
-    OnMPSetHandler(0);
+    OnMPSetHandler(CachedUnit->GetCurrentMP());
 }
 
 void UMPBar::OnMPSetHandler(int MP)

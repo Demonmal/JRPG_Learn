@@ -25,6 +25,7 @@ class JRPG_LEARN_API APlayerUnitBase : public AUnitBase
 	virtual void InitUnit(ABattleController* Controller) override;
 	virtual void SetUnitStats() override;
 	virtual void StartTurn() override;
+	virtual void EndTurn() override;
 	virtual void OnDied() override;
 
 	FORCEINLINE float GetExpExponent() const { return ExpExponent; }
@@ -48,6 +49,18 @@ class JRPG_LEARN_API APlayerUnitBase : public AUnitBase
 	virtual void RemoveUI();
 
 	protected:
+
+	void SetupInput();
+
+	UFUNCTION()
+	void OnAttackPressedHandler();
+	UFUNCTION()
+	void OnSkillPressedHandler();
+	UFUNCTION()
+	void OnItemPressedHandler();
+	UFUNCTION()
+	void OnFleePressedHandler();
+
 
 	UFUNCTION()
 	void OnActionPressedHandler(EActionType ActionType);

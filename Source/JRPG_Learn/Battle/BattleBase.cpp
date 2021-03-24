@@ -59,7 +59,6 @@ void ABattleBase::InitBattle()
 void ABattleBase::SpawnPlayerUnits()
 {
 	PlayerUnitLevels.Empty();
-	UE_LOG(LogTemp, Log, TEXT("SpawnPlayerUnits"))
 	TArray<TSubclassOf<APlayerUnitBase>> PartyMembers = PlayerController->GetPartyMembers();
 	for (int i{0}; i < PartyMembers.Num(); i++)
 	{
@@ -171,6 +170,7 @@ void ABattleBase::DropEquipment(AEnemyUnitBase *Unit)
 void ABattleBase::InitUnits()
 {
 	DeadPlayerUnits.Empty();
+	UE_LOG(LogTemp, Log, TEXT("InitUnits"))
 	for (auto Unit : PlayerUnits)
 	{
 		UJRPG_FunctionLibrary::SetActorDisableState(Cast<AActor>(Unit), false);

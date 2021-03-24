@@ -9,14 +9,18 @@
 #include "../../Battle/BattleController.h"
 #include "../../Units/UnitBase.h"
 #include "../../Units/PlayerUnits/PlayerUnitBase.h"
+#include "TimerManager.h"
 
 void ARedPotion::OnUsedInBattle(AUnitBase *Unit, TSubclassOf<APlayerUnitBase> PlayerUnitClass)
 {
     Unit->PlayAnimMontage(Unit->GetItemUseAnimMontage());
     Unit->Heal(UKismetMathLibrary::FTrunc(Unit->GetMaxHP() * HealPercent));
-    FLatentActionInfo LatentActionInfo;
-    UKismetSystemLibrary::Delay(GetWorld(), 1.5f, LatentActionInfo);
-    AUsableItemBase::OnUsedInBattle(Unit, PlayerUnitClass);
+    FTimerDelegate TimerCallback;
+    FTimerHandle TimerHandle;
+    TimerCallback.BindLambda([&]() {
+        AUsableItemBase::OnUsedInBattle(Unit, PlayerUnitClass);
+    });
+    GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerCallback, 1.5f, false);
 }
 
 void ARedPotion::OnUsedOutsideBattle(TSubclassOf<APlayerUnitBase> PlayerUnitClass)

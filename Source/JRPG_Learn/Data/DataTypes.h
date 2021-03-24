@@ -58,27 +58,27 @@ struct FUnitStats : public FTableRowBase
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere)
-	int MaxHP;
+	int MaxHP = 0;
 	UPROPERTY(EditAnywhere)
-	int MaxMP;
+	int MaxMP = 0;
 	UPROPERTY(EditAnywhere)
-	int MinAttack;
+	int MinAttack = 0;
 	UPROPERTY(EditAnywhere)
-	int MaxAttack;
+	int MaxAttack = 0;
 	UPROPERTY(EditAnywhere)
-	int Defense;
+	int Defense = 0;
 	UPROPERTY(EditAnywhere)
-	int Speed;
+	int Speed = 0;
 	UPROPERTY(EditAnywhere)
-	int Hit;
+	int Hit = 0;
 	UPROPERTY(EditAnywhere)
-	int MinMagicalAttack;
+	int MinMagicalAttack = 0;
 	UPROPERTY(EditAnywhere)
-	int MaxMagicalAttack;
+	int MaxMagicalAttack = 0;
 	UPROPERTY(EditAnywhere)
-	int MagicDefense;
+	int MagicDefense = 0;
 	UPROPERTY(EditAnywhere)
-	float ActionTime;
+	float ActionTime = 0.0f;
 
 	FUnitStats operator+(const FUnitStats &Stats)
 	{

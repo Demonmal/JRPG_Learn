@@ -8,6 +8,7 @@
 #include "ItemButton.h"
 #include "../../Items/ItemBase.h"
 #include "../../Items/UsableItems/UsableItemBase.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 UItemUseDialogue::UItemUseDialogue() : UUIBase()
 {
@@ -67,6 +68,8 @@ void UItemUseDialogue::ShowUsableItems(TMap<TSubclassOf<AUsableItemBase>, int> U
     for (const auto &Item : UsableItems)
     {
         UItemButton *Button = CreateWidget<UItemButton>(GetWorld(), ItemButtonClass);
+        Button->Item = Item.Key;
+        Button->Amount = Item.Value;
         ItemList->AddChild(Button);
         ItemButtons.Add(Button);
         Button->OnItemButtonClicked.AddUObject(this, &UItemUseDialogue::OnItemButtonClickedHandler);

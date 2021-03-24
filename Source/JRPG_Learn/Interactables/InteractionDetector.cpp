@@ -37,6 +37,7 @@ void AInteractionDetector::BeginPlay()
 	GameInstance = Cast<UJRPG_GameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
 	InteractionSphere->SetSphereRadius(InteractionRadius);
 	InteractionWidget->SetRelativeLocation(InteractionUILocation);
+	InteractionWidget->InitWidget();
 	InteractionUI = Cast<UInteractionUI>(InteractionWidget->GetUserWidgetObject());
 	InteractionUI->HideInteractionUI();
 	InteractionUI->Init(InteractionText);

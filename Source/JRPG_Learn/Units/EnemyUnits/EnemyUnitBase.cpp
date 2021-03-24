@@ -28,6 +28,7 @@ void AEnemyUnitBase::InitUnit(ABattleController *Controller)
     AUnitBase::InitUnit(Controller);
     SetHP(MaxHP);
     EnemyUnitWidget->SetVisibility(true);
+    EnemyUnitWidget->InitWidget();
     EnemyUnitUI = Cast<UEnemyUnitUI>(EnemyUnitWidget->GetUserWidgetObject());
     EnemyUnitUI->Init(this, BattleController.Get());
     RotateUnitUIToCamera();

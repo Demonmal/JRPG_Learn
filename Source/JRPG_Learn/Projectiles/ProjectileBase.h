@@ -19,6 +19,7 @@ class JRPG_LEARN_API AProjectileBase : public AActor
 	GENERATED_BODY()
 
 public:	
+	AProjectileBase();
 
 	OnProjectileHitSignature OnProjectileHit;
 	
@@ -38,7 +39,7 @@ protected:
 	void ProjectileMoveTimelineFinish();
 
 	UPROPERTY(EditDefaultsOnly)
-	float Speed;
+	float Speed = 1000.0f;
 	UPROPERTY(EditDefaultsOnly)
 	UParticleSystem *HitEffect;
 	UPROPERTY(EditDefaultsOnly)

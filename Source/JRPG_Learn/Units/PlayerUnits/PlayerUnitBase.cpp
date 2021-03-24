@@ -17,6 +17,7 @@
 #include "../../Controllers/JRPG_FunctionLibrary.h"
 #include "../../Controllers/JRPG_GameInstance.h"
 #include "../../Controllers/AudioPlayerController.h"
+#include "TimerManager.h"
 
 APlayerUnitBase::APlayerUnitBase() : AUnitBase::AUnitBase()
 {
@@ -29,21 +30,59 @@ APlayerUnitBase::APlayerUnitBase() : AUnitBase::AUnitBase()
 
 void APlayerUnitBase::Tick(float DeltaSeconds)
 {
-	Super::Tick(DeltaSeconds);
-	BackCameraAdjustTimeline.TickTimeline(DeltaSeconds);
+    Super::Tick(DeltaSeconds);
+    BackCameraAdjustTimeline.TickTimeline(DeltaSeconds);
 }
 
 void APlayerUnitBase::InitUnit(ABattleController *Controller)
 {
     AUnitBase::InitUnit(Controller);
+    SetupInput();
     UJRPG_GameInstance *GameInstance = Cast<UJRPG_GameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
     AudioController = GameInstance->AudioPlayerController(GetWorld());
     SetPlayerHPMP();
     SetBattleSkills();
+    ActionButtonsWidget->InitWidget();
     ActionsUI = Cast<UActionsUI>(ActionButtonsWidget->GetUserWidgetObject());
     ActionsUI->Init();
     ActionsUI->OnActionPressed.AddUObject(this, &APlayerUnitBase::OnActionPressedHandler);
     BackCameraSpringArm->SetRelativeRotation(GetActorRotation());
+}
+
+void APlayerUnitBase::SetupInput()
+{
+    InputComponent = NewObject<UInputComponent>(this, UInputComponent::StaticClass(), TEXT("Input Component"));
+    if (InputComponent)
+    {
+        InputComponent->BindAction("Attack", EInputEvent::IE_Pressed, this, &APlayerUnitBase::OnAttackPressedHandler);
+        InputComponent->BindAction("Skill", EInputEvent::IE_Pressed, this, &APlayerUnitBase::OnSkillPressedHandler);
+        InputComponent->BindAction("Item", EInputEvent::IE_Pressed, this, &APlayerUnitBase::OnItemPressedHandler);
+        InputComponent->BindAction("Flee", EInputEvent::IE_Released, this, &APlayerUnitBase::OnFleePressedHandler);
+    }
+}
+
+void APlayerUnitBase::OnAttackPressedHandler()
+{
+    UE_LOG(LogTemp, Log, TEXT("APlayerUnitBase::OnAttackPressedHandler"))
+    OnActionPressedHandler(EActionType::Attack);
+}
+
+void APlayerUnitBase::OnSkillPressedHandler()
+{
+    UE_LOG(LogTemp, Log, TEXT("APlayerUnitBase::OnSkillPressedHandler"))
+    OnActionPressedHandler(EActionType::Skill);
+}
+
+void APlayerUnitBase::OnItemPressedHandler()
+{
+    UE_LOG(LogTemp, Log, TEXT("APlayerUnitBase::OnItemPressedHandler"))
+    OnActionPressedHandler(EActionType::Item);
+}
+
+void APlayerUnitBase::OnFleePressedHandler()
+{
+    UE_LOG(LogTemp, Log, TEXT("APlayerUnitBase::OnFleePressedHandler"))
+    OnActionPressedHandler(EActionType::Flee);
 }
 
 void APlayerUnitBase::OnActionPressedHandler(EActionType ActionType)
@@ -75,7 +114,7 @@ void APlayerUnitBase::OnActionPressedHandler(EActionType ActionType)
 void APlayerUnitBase::SetPlayerHPMP()
 {
     FPlayerUnitData Data;
-    if (BattleController->GetPlayerController()->TryGetUnitDataByPlayer(this->StaticClass(), Data))
+    if (BattleController->GetPlayerController()->TryGetUnitDataByPlayer(this->GetClass(), Data))
     {
         SetHP(Data.CurrentHP);
         SetMP(Data.CurrentMP);
@@ -92,7 +131,7 @@ void APlayerUnitBase::SetBattleSkills()
         }
     }
     FPlayerUnitData Data;
-    if (BattleController->GetPlayerController()->TryGetUnitDataByPlayer(this->StaticClass(), Data))
+    if (BattleController->GetPlayerController()->TryGetUnitDataByPlayer(this->GetClass(), Data))
     {
         TArray<TSubclassOf<ABattleSkillBase>> EquipmentBattleSkills;
         TArray<TSubclassOf<AExploreSkillBase>> EquipmentExploreSkills;
@@ -104,7 +143,7 @@ void APlayerUnitBase::SetBattleSkills()
 void APlayerUnitBase::SetUnitStats()
 {
     FPlayerUnitData Data;
-    if (!BattleController->GetPlayerController()->TryGetUnitDataByPlayer(this->StaticClass(), Data))
+    if (!BattleController->GetPlayerController()->TryGetUnitDataByPlayer(this->GetClass(), Data))
         return;
     FUnitStats Stats = UJRPG_FunctionLibrary::GetUnitStats(Level, MaxLevel, InitialStats, FirstLevelStats, LastLevelStats);
     FUnitStats EquipmentStats = UJRPG_FunctionLibrary::GetEquipmentStats(Data);
@@ -131,37 +170,40 @@ void APlayerUnitBase::AdjustBackCamera(AUnitBase *TargetUnit, bool bIsInstant)
     }
     BackCameraArrow = NewObject<UArrowComponent>(this, UArrowComponent::StaticClass(), TEXT("BackCameraArrow"), RF_NoFlags);
     BackCameraArrow->RegisterComponent();
+    BackCameraArrow->SetRelativeLocation(FVector(-100.0f, .0f, 300.0f));
 
     FRotator LookAtRotator = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), TargetUnit->GetCameraLookLocation()->GetComponentLocation());
-    FRotator ArrowRotator{LookAtRotator.Pitch, LookAtRotator.Yaw, BackCameraActor->GetComponentRotation().Roll};
+    LookAtRotator.Yaw += 40.0f;
+    LookAtRotator.Pitch -= 15.0f;
+    FRotator ArrowRotator(LookAtRotator.Pitch, LookAtRotator.Yaw, BackCameraActor->GetComponentRotation().Roll);
     BackCameraArrow->SetWorldRotation(ArrowRotator);
 
-    FVector Offset = BackCameraArrow->GetForwardVector() * BackCameraSpringArm->TargetArmLength * -1;
+    FVector Offset = BackCameraArrow->GetForwardVector() * BackCameraSpringArm->TargetArmLength * -1.0f;
     BackCameraArrow->SetWorldLocation(Offset + BackCameraArrow->GetComponentLocation());
 
     LookAtRotator = UKismetMathLibrary::FindLookAtRotation(BackCameraArrow->GetComponentLocation(), TargetUnit->GetCameraLookLocation()->GetComponentLocation());
-    BackCameraArrow->SetWorldRotation(FRotator(LookAtRotator.Pitch, LookAtRotator.Yaw, 0));
+    BackCameraArrow->SetWorldRotation(FRotator(BackCameraArrow->GetComponentRotation().Pitch, LookAtRotator.Yaw, 0));
 
     CameraStartTransform = BackCameraArrow->GetComponentTransform();
 
-    if(PlayerController->GetViewTarget() == BackCameraActor->GetChildActor())
+    if (PlayerController->GetViewTarget() == BackCameraActor->GetChildActor())
     {
         if (IsValid(BackCameraAdjustTimelineCurve))
-	    {
-		    FOnTimelineFloatStatic BackCameraAdjustTimelineUpdate;
+        {
+            FOnTimelineFloatStatic BackCameraAdjustTimelineUpdate;
             FOnTimelineEventStatic BackCameraAdjustTimelineFinish;
-		    BackCameraAdjustTimelineUpdate.BindUObject(this, &APlayerUnitBase::BackCameraAdjustTimelineUpdate);
+            BackCameraAdjustTimelineUpdate.BindUObject(this, &APlayerUnitBase::BackCameraAdjustTimelineUpdate);
             BackCameraAdjustTimelineFinish.BindUObject(this, &APlayerUnitBase::BackCameraAdjustTimelineFinished);
-		    BackCameraAdjustTimeline.AddInterpFloat(BackCameraAdjustTimelineCurve, BackCameraAdjustTimelineUpdate);
+            BackCameraAdjustTimeline.AddInterpFloat(BackCameraAdjustTimelineCurve, BackCameraAdjustTimelineUpdate);
             BackCameraAdjustTimeline.SetTimelineFinishedFunc(BackCameraAdjustTimelineFinish);
-		    BackCameraAdjustTimeline.Play();
-	    }
+            BackCameraAdjustTimeline.Play();
+        }
     }
     else
     {
         BackCameraActor->SetWorldTransform(BackCameraArrow->GetComponentTransform());
         PlayerController->SetViewTargetWithBlend(BackCameraActor->GetChildActor(), bIsInstant ? 0.0f : 0.5f);
-        if(IsValid(BackCameraArrow))
+        if (IsValid(BackCameraArrow))
         {
             BackCameraArrow->DestroyComponent();
         }
@@ -170,16 +212,16 @@ void APlayerUnitBase::AdjustBackCamera(AUnitBase *TargetUnit, bool bIsInstant)
 
 void APlayerUnitBase::BackCameraAdjustTimelineUpdate(const float Alpha)
 {
-    FTransform BackCameraAttowTransform = BackCameraArrow->GetComponentTransform();
+    FTransform BackCameraArrowTransform = BackCameraArrow->GetComponentTransform();
     FTransform NewTransform;
-    NewTransform.SetLocation(UKismetMathLibrary::VLerp(CameraStartTransform.GetLocation(), BackCameraAttowTransform.GetLocation(), Alpha));
-    NewTransform.SetRotation(FQuat::Slerp(CameraStartTransform.GetRotation(), BackCameraAttowTransform.GetRotation(), Alpha));
+    NewTransform.SetLocation(UKismetMathLibrary::VLerp(CameraStartTransform.GetLocation(), BackCameraArrowTransform.GetLocation(), Alpha));
+    NewTransform.SetRotation(FQuat::Slerp(CameraStartTransform.GetRotation(), BackCameraArrowTransform.GetRotation(), Alpha));
     BackCameraActor->SetWorldTransform(NewTransform);
 }
 
 void APlayerUnitBase::BackCameraAdjustTimelineFinished()
 {
-    if(IsValid(BackCameraArrow))
+    if (IsValid(BackCameraArrow))
     {
         BackCameraArrow->DestroyComponent();
     }
@@ -187,14 +229,17 @@ void APlayerUnitBase::BackCameraAdjustTimelineFinished()
 
 void APlayerUnitBase::StartTurn()
 {
+    UE_LOG(LogTemp, Log, TEXT("APlayerUnitBase::StartTurn"))
+    InputComponent->bBlockInput = 0;
+    EnableInput(BattleController->GetPlayerController());
     CurrentActionType = EActionType::Attack;
-    if(IsUnitDead())
+    if (IsUnitDead())
     {
         AUnitBase::StartTurn();
     }
     else
     {
-        if(OnTurnStarted.IsBound())
+        if (OnTurnStarted.IsBound())
         {
             OnTurnStarted.Broadcast();
         }
@@ -203,6 +248,13 @@ void APlayerUnitBase::StartTurn()
         ActionsUI->ShowActionsUI();
         SetEnemyTargetAndAdjustCamera();
     }
+}
+
+void APlayerUnitBase::EndTurn()
+{
+    AUnitBase::EndTurn();
+    InputComponent->bBlockInput = 1;
+    DisableInput(BattleController->GetPlayerController());
 }
 
 FTransform APlayerUnitBase::GetProjectileSpawnTransform()
@@ -215,7 +267,7 @@ void APlayerUnitBase::ChangeEnemyTarget(bool bIsRight)
     CurrentTarget->SetTargetIconVisibility(false);
     int Index = CurrentTargetIndex;
     int LastEnemyUnitsIndex = BattleController->GetCurrentBattle()->GetEnemyUnits().Num() - 1;
-    if(bIsRight)
+    if (bIsRight)
     {
         Index = Index - 1 < 0 ? LastEnemyUnitsIndex : Index - 1;
     }
@@ -233,7 +285,7 @@ void APlayerUnitBase::ChangePlayerTarget(bool bIsRight)
     CurrentTarget->SetTargetIconVisibility(false);
     int Index = CurrentTargetIndex;
     int LastEnemyUnitsIndex = BattleController->GetCurrentBattle()->GetPlayerUnits().Num() - 1;
-    if(bIsRight)
+    if (bIsRight)
     {
         Index = Index - 1 < 0 ? LastEnemyUnitsIndex : Index - 1;
     }
@@ -260,7 +312,7 @@ void APlayerUnitBase::ChangeCameraForSkill(TSubclassOf<ABattleSkillBase> Skill)
     CurrentActionType = EActionType::Skill;
     EnableInput(PlayerController.Get());
     ABattleSkillBase *SkillBase = Cast<ABattleSkillBase>(Skill->GetDefaultObject());
-    if(SkillBase->GetSkillType() == ESkillType::Offensive)
+    if (SkillBase->GetSkillType() == ESkillType::Offensive)
     {
         SetEnemyTargetAndAdjustCamera();
     }
@@ -295,7 +347,7 @@ AUnitBase *APlayerUnitBase::GetTargetUnit(bool bIsPlayer)
 {
     ABattleBase *CurrentBattle = BattleController->GetCurrentBattle();
     AUnitBase *Target;
-    if(bIsPlayer)
+    if (bIsPlayer)
     {
         Target = Cast<AUnitBase>(CurrentBattle->GetPlayerUnits()[CurrentTargetIndex]);
     }
@@ -315,7 +367,8 @@ void APlayerUnitBase::RemoveUI()
 
 void APlayerUnitBase::OnDied()
 {
-    FLatentActionInfo LatentActionInfo;
-    UKismetSystemLibrary::Delay(GetWorld(), .5f, LatentActionInfo);
-    Destroy();
+    FTimerDelegate TimerDelegate;
+    TimerDelegate.BindLambda([&]() { Destroy(); });
+    FTimerHandle TimerHandle;
+    GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerDelegate, .5f, false);
 }

@@ -12,8 +12,8 @@ void UBaseBattleAnim::NativeBeginPlay()
     bIsDead = false;
     if(CachedUnit.IsValid())
     {
-        IdleAnim = CachedUnit->GetIdleAnim();
-        DieAnim = CachedUnit->GetDieAnim();
+        IdleAnim = Cast<UAnimSequenceBase>(CachedUnit->GetIdleAnim());
+        DieAnim = Cast<UAnimSequenceBase>(CachedUnit->GetDieAnim());
         CachedUnit->OnUnitDied.AddLambda([&bIsDeadRef = bIsDead](AUnitBase * DiedUnit) {bIsDeadRef = true;});
     }
 }

@@ -93,6 +93,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void InitTurnOrderUI();
 
+	void SetBattle(ABattleBase *Battle);
+	void SetBattleController(ABattleController *Controller);
+
 	FOnItemSelectedSignature OnItemSelected;
 	FOnSkillSelectedSignature OnSkillSelected;
 	FOnItemInventoryClosedSignature OnItemInventoryClosed;

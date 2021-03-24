@@ -2,6 +2,7 @@
 
 #include "BattleUI.h"
 #include "../Units/UnitBase.h"
+#include "../Units/PlayerUnits/PlayerUnitBase.h"
 #include "../Battle/BattleController.h"
 #include "../Battle/BattleBase.h"
 #include "../Controllers/JRPG_PlayerController.h"
@@ -19,7 +20,7 @@ void UBattleUI::ShowBattleUI()
 {
     BP_PlayerUnitsList->SetPlayerUnitUIList(CurrentBattle->GetPlayerUnits(), BattleController.Get());
     PlayAnimation(ShowPlayerUnitListUIAnim);
-    PlayAnimation(TargetImageAnim);
+    PlayAnimation(TargetImageAnim, 0.0f, 0);
     ShowBossUI();
 }
 
@@ -225,4 +226,14 @@ void UBattleUI::UpdateTurnOrderList(AUnitBase *Unit)
         InitTurnOrderUI();
         BP_TurnOrderList->UpdateTurnOderList(Unit);
     }
+}
+
+void UBattleUI::SetBattle(ABattleBase *Battle)
+{
+    CurrentBattle = Battle;
+}
+
+void UBattleUI::SetBattleController(ABattleController *Controller)
+{
+    BattleController = Controller;
 }

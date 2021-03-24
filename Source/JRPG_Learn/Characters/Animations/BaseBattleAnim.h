@@ -20,10 +20,10 @@ class JRPG_LEARN_API UBaseBattleAnim : public UAnimInstance
 	UPROPERTY(BlueprintReadWrite)
 	bool bIsDead = false;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UAnimSequenceBase* IdleAnim;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UAnimSequenceBase* DieAnim;
 
 	private:

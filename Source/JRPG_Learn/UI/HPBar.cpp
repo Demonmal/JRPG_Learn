@@ -10,7 +10,7 @@ void UHPBar::SetUnit(AUnitBase* Unit)
 {
     CachedUnit = TWeakObjectPtr<AUnitBase>(Unit);
     CachedUnit->OnHPSet.AddUObject(this, &UHPBar::OnHPSetHandler);
-    OnHPSetHandler(0);
+    OnHPSetHandler(CachedUnit->GetCurrentHP());
 }
 
 void UHPBar::OnHPSetHandler(int HP)

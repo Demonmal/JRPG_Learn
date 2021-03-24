@@ -8,6 +8,7 @@
 
 void UUnitBattleDetails::UpdateUnitDetails(AUnitBase* Unit)
 {
+    UE_LOG(LogTemp, Log, TEXT("UUnitBattleDetails::UpdateUnitDetails"))
     UnitName->SetText(Unit->GetTitle());
     UnitThumbnail->SetBrushFromTexture(Unit->GetThumbnail());
     FString String = FString::Printf(TEXT("Level %i"), Unit->GetUnitLevel());
@@ -18,6 +19,7 @@ void UUnitBattleDetails::UpdateUnitDetails(AUnitBase* Unit)
     Defense->SetText(FText::FromString(String));
     String = FString::Printf(TEXT("%i - %i"), Unit->GetMinMagicalAttack(), Unit->GetMaxMagicalAttack());
     MagicalAttack->SetText(FText::FromString(String));
+    UE_LOG(LogTemp, Log, TEXT("MagicalAttack %i %s"), Unit->GetMinMagicalAttack() , *String)
     String = FString::Printf(TEXT("%i"), Unit->GetMagicDefense());
     MagicalDefense->SetText(FText::FromString(String));
     String = FString::Printf(TEXT("%i"), Unit->GetHit());

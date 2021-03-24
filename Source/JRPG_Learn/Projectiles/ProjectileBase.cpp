@@ -5,6 +5,11 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "../Units/UnitBase.h"
 
+AProjectileBase::AProjectileBase() : AActor::AActor()
+{
+	PrimaryActorTick.bCanEverTick = 1;
+}
+
 void AProjectileBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -28,12 +33,12 @@ void AProjectileBase::MoveProjectileToTarget()
 	ProjectileMoveTimelineFinish.BindUObject(this, &AProjectileBase::ProjectileMoveTimelineFinish);
 	ProjectileMoveTimeline.AddInterpFloat(ProjectileMoveCurve, ProjectileMoveTimelineUpdate);
 	ProjectileMoveTimeline.SetTimelineFinishedFunc(ProjectileMoveTimelineFinish);
-	ProjectileMoveTimeline.Play();
+	ProjectileMoveTimeline.PlayFromStart();
 }
 
 void AProjectileBase::ProjectileMoveTimelineUpdate(const float Alpha)
 {	
-	FVector NewLocation = UKismetMathLibrary::VInterpTo(GetActorLocation(), TargetLocation, DeltaSeconds, Speed);
+	FVector NewLocation = FMath::VInterpConstantTo(GetActorLocation(), TargetLocation, DeltaSeconds, Speed);
 	SetActorLocation(NewLocation);
 }
 

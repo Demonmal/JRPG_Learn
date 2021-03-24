@@ -125,6 +125,7 @@ void ABattleController::SwitchToExploreMode()
 
 void ABattleController::StartBattle()
 {
+	UE_LOG(LogTemp, Log, TEXT("ABattleController::StartBattle"))
 	IncreaseTurnCount();
 	PlayBattleTheme();
 	CurrentBattle->InitUnits();
@@ -132,6 +133,8 @@ void ABattleController::StartBattle()
 	{
 		BattleUI = CreateWidget<UBattleUI>(GetWorld(), BattleUIClass);
 		BattleUI->AddToViewport();
+		BattleUI->SetBattle(CurrentBattle.Get());
+		BattleUI->SetBattleController(this);
 		BattleUI->ShowBattleUI();
 		SetReadyUnits();
 	}
@@ -153,6 +156,7 @@ void ABattleController::IncreaseTurnCount()
 void ABattleController::SetReadyUnits()
 {
 	AttackUnitIndex = 0;
+	float WaitTime = 2.0f;
 	switch (TurnType)
 	{
 	case ETurnType::ActionTime:
@@ -163,15 +167,15 @@ void ABattleController::SetReadyUnits()
 			OnActionTimeAdded.Broadcast(ClosestActionTime);
 		}
 		CurrentBattle->AddActionTime(ClosestActionTime);
-		UKismetSystemLibrary::Delay(GetWorld(), ClosestActionTime, LatentActionInfo);
+		WaitTime = ClosestActionTime;
 		break;
 	case ETurnType::Speed:
 		IncreaseTurnCount();
 		ReadyToAttackUnits = GetReadyUnitsBasedOnSpeed();
-		UKismetSystemLibrary::Delay(GetWorld(), 2.0f, LatentActionInfo);
 		break;
 	}
-	OnUnitsTurnStarted();
+	FTimerHandle TimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ABattleController::OnUnitsTurnStarted, WaitTime);
 }
 
 void ABattleController::OnUnitsTurnStarted()
@@ -464,6 +468,7 @@ void ABattleController::Attack(AUnitBase *TargetUnit)
 	}
 	else
 	{
+		UE_LOG(LogTemp, Log, TEXT("MeleeAttack"))
 		if (bShouldUnitsMoveToTarget)
 		{
 			MoveToTarget(CurrentTargetUnit->GetAttackerLocation()->GetComponentLocation(), &ABattleController::OnUnitMovedToTargetHandler, true);
@@ -482,6 +487,7 @@ void ABattleController::OnUnitMovedToTargetHandler()
 
 void ABattleController::RangeAttack()
 {
+	UE_LOG(LogTemp, Log, TEXT("RangeAttack"))
 	bRangeAttackAnimHasEnded = false;
 	bHasProjectileHit = false;
 	UAnimMontage *AttackAnimMontage = CurrentAttackingUnit->GetAttackAnimMontage();
@@ -774,7 +780,9 @@ bool ABattleController::SwitchToStaticCamera()
 	AActor *StaticCamera = CurrentBattle->GetStaticCamera();
 	if (IsValid(StaticCamera))
 	{
-		PlayerController->SetViewTargetWithBlend(StaticCamera, 0.5f, EViewTargetBlendFunction::VTBlend_Cubic);
+		UE_LOG(LogTemp, Log, TEXT("ABattleController::SwitchToStaticCamera"))
+		//PlayerController->SetViewTargetWithBlend(StaticCamera, 0.5f, EViewTargetBlendFunction::VTBlend_Cubic);
+		PlayerController->SetViewTarget(StaticCamera);
 		Result = true;
 	}
 	return Result;
