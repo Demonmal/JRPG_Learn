@@ -11,7 +11,7 @@ void AUsableItemBase::Use(ABattleController *BattleController_l, AJRPG_PlayerCon
 {
     BattleController = BattleController_l;
     PlayerController = PlayerController_l;
-    PlayerController->OnUsableItemUsed(StaticClass(), 1);
+    PlayerController->OnUsableItemUsed(GetClass(), 1);
     if(bIsBattle)
     {
         OnUsedInBattle(Unit, PlayerUnitClass);

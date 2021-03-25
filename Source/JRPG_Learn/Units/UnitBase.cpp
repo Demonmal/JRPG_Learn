@@ -14,10 +14,10 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "../Battle/BattleBase.h"
+#include "../Battle/DamageText.h"
 #include "../Controllers/JRPG_FunctionLibrary.h"
 #include "../Controllers/JRPG_PlayerController.h"
 #include "../UI/TargetIcon.h"
-#include "../UI/DamageTextUI.h"
 
 // Sets default values
 AUnitBase::AUnitBase()
@@ -249,16 +249,20 @@ void AUnitBase::Heal(int HealAmount)
 {
 	int NewHP = UKismetMathLibrary::Clamp(CurrentHP + HealAmount, 0, MaxHP);
 	SetHP(NewHP);
-	FTransform HitTransform = ProjectileHitLocation->GetComponentTransform();
-	GetWorld()->SpawnActor<UDamageTextUI>(UDamageTextUI::StaticClass(), HitTransform);
+	FTransform HitTransform;
+	HitTransform.SetLocation(ProjectileHitLocation->GetComponentLocation());
+	ADamageText *DamageText = GetWorld()->SpawnActor<ADamageText>(DamageTextClass, HitTransform);
+	DamageText->CreateTextWidget(HealAmount, this, true);
 }
 
 void AUnitBase::IncreaseMP(int ManaAmount)
 {
 	int NewMP = UKismetMathLibrary::Clamp(CurrentMP + ManaAmount, 0, MaxMP);
 	SetMP(NewMP);
-	FTransform HitTransform = ProjectileHitLocation->GetComponentTransform();
-	GetWorld()->SpawnActor<UDamageTextUI>(UDamageTextUI::StaticClass(), HitTransform);
+	FTransform HitTransform;
+	HitTransform.SetLocation(ProjectileHitLocation->GetComponentLocation());
+	ADamageText *DamageText = GetWorld()->SpawnActor<ADamageText>(DamageTextClass, HitTransform);
+	DamageText->CreateTextWidget(ManaAmount, this, false, true);
 }
 
 void AUnitBase::ReceiveDamage(int Damage)

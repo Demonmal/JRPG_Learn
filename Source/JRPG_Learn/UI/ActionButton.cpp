@@ -8,7 +8,7 @@
 
 bool UActionButton::Initialize()
 {
-    GameInstance = Cast<UJRPG_GameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+    GameInstance = Cast<UJRPG_GameInstance>(GetWorld()->GetGameInstance());
     return Super::Initialize();
 }
 

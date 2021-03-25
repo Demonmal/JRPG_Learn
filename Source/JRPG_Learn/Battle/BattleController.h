@@ -20,6 +20,7 @@ class AUnitBase;
 class ABattleBase;
 class ABattleSkillBase;
 class UBattleUI;
+class ADamageText;
 class APlayerUnitBase;
 class UVictoryDialogue;
 class ULevelUpDialogue;
@@ -85,6 +86,8 @@ private:
 	void AddMiscItemsToPlayerInventory();
 	void AddEquipmentToPlayerInventory();
 	void ShowLeveledUpUnit();
+	int CalculateDamage(int PureDamage, float DamageMultiplier);
+	bool IsHit();
 	bool IsUnitHasEnoughMP(TSubclassOf<ABattleSkillBase> Skill);
 	void UseSkill(AUnitBase *TargetUnit);
 	void UseItem(AUnitBase *TargetUnit, TSubclassOf<APlayerUnitBase> UnitClass);
@@ -163,6 +166,8 @@ private:
 	TSubclassOf<ULevelUpDialogue> LevelUpDialogueClass;
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UDefeatDialogue> DefeatDialogueClass;
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<ADamageText> DamageTextClass;
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<ABattleTransitionBase> BattleTransition;
 	UPROPERTY(EditAnywhere)

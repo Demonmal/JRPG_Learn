@@ -13,7 +13,7 @@
 
 void USkillButton::NativeConstruct()
 {
-	AudioPlayerController = Cast<UJRPG_GameInstance>(UGameplayStatics::GetGameInstance(GetWorld()))->AudioPlayerController(GetWorld());
+	AudioPlayerController = Cast<UJRPG_GameInstance>(GetWorld()->GetGameInstance())->AudioPlayerController(GetWorld());
 	Super::NativeConstruct();
 }
 

@@ -49,6 +49,8 @@ void UBattleUI::ShowUsableItemInventory()
 void UBattleUI::OnItemSelectedHandler(TSubclassOf<AItemBase> SelectedItemClass)
 {
     UnbindAllItemEvents();
+    FInputModeGameOnly InputModeGameOnly;
+    UGameplayStatics::GetPlayerController(GetWorld(), 0)->SetInputMode(InputModeGameOnly);
     if (OnItemSelected.IsBound())
     {
         OnItemSelected.Broadcast(SelectedItemClass);

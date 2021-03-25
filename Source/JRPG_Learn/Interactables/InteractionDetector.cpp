@@ -34,7 +34,7 @@ AInteractionDetector::AInteractionDetector()
 void AInteractionDetector::BeginPlay()
 {
 	Super::BeginPlay();
-	GameInstance = Cast<UJRPG_GameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+	GameInstance = Cast<UJRPG_GameInstance>(GetWorld()->GetGameInstance());
 	InteractionSphere->SetSphereRadius(InteractionRadius);
 	InteractionWidget->SetRelativeLocation(InteractionUILocation);
 	InteractionWidget->InitWidget();

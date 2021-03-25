@@ -81,6 +81,7 @@ void UItemUseDialogue::ShowUsableItems(TMap<TSubclassOf<AUsableItemBase>, int> U
 
 void UItemUseDialogue::CallOnItemSelected(TSubclassOf<AItemBase> SelectedItem)
 {
+    UE_LOG(LogTemp, Log, TEXT("UItemUseDialogue::CallOnItemSelected"))
     if (OnItemSelected.IsBound())
     {
         OnItemSelected.Broadcast(SelectedItem);
@@ -89,6 +90,7 @@ void UItemUseDialogue::CallOnItemSelected(TSubclassOf<AItemBase> SelectedItem)
 
 void UItemUseDialogue::CallOnCanceled()
 {
+    UE_LOG(LogTemp, Log, TEXT("UItemUseDialogue::CallOnCanceled"))
     if (OnCanceled.IsBound())
     {
         OnCanceled.Broadcast();

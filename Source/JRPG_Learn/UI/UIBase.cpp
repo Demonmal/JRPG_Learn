@@ -8,7 +8,7 @@
 
 void UUIBase::NativeConstruct()
 {
-	AudioPlayerController = Cast<UJRPG_GameInstance>(UGameplayStatics::GetGameInstance(GetWorld()))->AudioPlayerController(GetWorld());
+	AudioPlayerController = Cast<UJRPG_GameInstance>(GetWorld()->GetGameInstance())->AudioPlayerController(GetWorld());
 	Super::NativeConstruct();
 }
 
@@ -80,7 +80,7 @@ void UUIBase::ListenMenuLeftLogic()
 
 void UUIBase::ListenMenuConfirmLogic()
 {
-    UE_LOG(LogTemp, Log, TEXT("MenuConfirm Pressed"))
+    UE_LOG(LogTemp, Log, TEXT("MenuConfirm Pressed %i"), bIsUIInputBlocked ? 1 : 0)
     if(!bIsUIInputBlocked)
     {
         MenuConfirm();
@@ -89,6 +89,7 @@ void UUIBase::ListenMenuConfirmLogic()
 
 void UUIBase::ListenMenuCancelLogic()
 {
+    UE_LOG(LogTemp, Log, TEXT("MenuCancel Pressed %i"), bIsUIInputBlocked ? 1 : 0)
     if(!bIsUIInputBlocked)
     {
         MenuCancel();
@@ -110,5 +111,5 @@ void UUIBase::PlayConfirmSound()
 
 void UUIBase::SetUIInput(bool bIsBlocked)
 {
-    bIsUIInputBlocked = bIsBlocked;
+    
 }

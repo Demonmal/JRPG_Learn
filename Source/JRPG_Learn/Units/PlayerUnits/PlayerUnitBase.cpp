@@ -38,7 +38,7 @@ void APlayerUnitBase::InitUnit(ABattleController *Controller)
 {
     AUnitBase::InitUnit(Controller);
     SetupInput();
-    UJRPG_GameInstance *GameInstance = Cast<UJRPG_GameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+    UJRPG_GameInstance *GameInstance = Cast<UJRPG_GameInstance>(GetWorld()->GetGameInstance());
     AudioController = GameInstance->AudioPlayerController(GetWorld());
     SetPlayerHPMP();
     SetBattleSkills();

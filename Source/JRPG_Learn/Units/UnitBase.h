@@ -29,6 +29,7 @@ class USkeletalMeshComponent;
 class UAnimInstance;
 class ABattleBase;
 class UArrowComponent;
+class ADamageText;
 
 UCLASS()
 class JRPG_LEARN_API AUnitBase : public AActor
@@ -174,6 +175,9 @@ protected:
 	UCurveFloat *RotationTimelineCurve;
 	UPROPERTY(EditDefaultsOnly)
 	UCurveFloat *MovementTimelineCurve;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<ADamageText> DamageTextClass;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Stats")
 	FUnitStats InitialStats;

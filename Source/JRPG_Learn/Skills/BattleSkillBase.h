@@ -20,6 +20,7 @@ class JRPG_LEARN_API ABattleSkillBase : public ASkillBase
 	GENERATED_BODY()
 
 public:
+	FORCEINLINE bool IsAlwaysHits() const { return bAlwaysHits; }
 	FORCEINLINE ESkillType GetSkillType() const { return SkillType; }
 	FORCEINLINE EDamageType GetDamageType() const { return DamageType; }
 

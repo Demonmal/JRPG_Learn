@@ -33,7 +33,7 @@ void ABattleBase::BeginPlay()
 	PlayerController = Cast<AJRPG_PlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 	if (!IsValid(BattleController))
 	{
-		UJRPG_GameInstance *GameInstance = Cast<UJRPG_GameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+		UJRPG_GameInstance *GameInstance = Cast<UJRPG_GameInstance>(GetWorld()->GetGameInstance());
 		checkf(IsValid(GameInstance), TEXT("ABattleBase::BeginPlay -> Game Instance isn't valid"));
 		BattleController = GameInstance->GetBattleController();
 		checkf(IsValid(BattleController), TEXT("ABattleBase::BeginPlay -> Battle Controller is null"));

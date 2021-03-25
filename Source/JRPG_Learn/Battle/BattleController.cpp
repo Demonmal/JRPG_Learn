@@ -21,7 +21,9 @@
 #include "../Items/UsableItems/UsableItemBase.h"
 #include "../Skills/BattleSkillBase.h"
 #include "BattleBase.h"
+#include "DamageText.h"
 #include "BattleTransitions/BattleTransitionBase.h"
+#include "TimerManager.h"
 
 ABattleController::ABattleController()
 {
@@ -46,7 +48,7 @@ void ABattleController::BeginPlay()
 {
 	Super::BeginPlay();
 	PlayExploreTheme();
-	UJRPG_GameInstance *GameInstance = Cast<UJRPG_GameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+	UJRPG_GameInstance *GameInstance = Cast<UJRPG_GameInstance>(GetWorld()->GetGameInstance());
 	if (IsValid(GameInstance))
 	{
 		GameInstance->SetBattleControllerInstance(this);
@@ -511,15 +513,19 @@ void ABattleController::MeleeAttack()
 	MontageNotifyDelegate.BindUFunction(this, "OnMeleeAttackAnimMontageNotified");
 	CurrentAttackingUnit->GetAnimInstance()->OnPlayMontageNotifyBegin.Add(MontageNotifyDelegate);
 	CurrentAttackingUnit->PlayAnimMontage(AttackAnimMontage);
-	UKismetSystemLibrary::Delay(GetWorld(), AttackAnimMontage->SequenceLength, LatentActionInfo);
-	if (bShouldUnitsMoveToTarget)
-	{
-		MoveToTarget(CurrentAttackingUnit->GetInitialLocation(), &ABattleController::OnUnitMovedBackHandler, false);
-	}
-	else
-	{
-		CurrentAttackingUnit->EndTurn();
-	}
+	FTimerDelegate TimerCallback;
+	FTimerHandle TimerHandle;
+	TimerCallback.BindLambda([&]() {
+		if (bShouldUnitsMoveToTarget)
+		{
+			MoveToTarget(CurrentAttackingUnit->GetInitialLocation(), &ABattleController::OnUnitMovedBackHandler, false);
+		}
+		else
+		{
+			CurrentAttackingUnit->EndTurn();
+		}
+	});
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerCallback, AttackAnimMontage->SequenceLength, false);
 }
 
 void ABattleController::OnUnitMovedBackHandler()
@@ -552,8 +558,12 @@ void ABattleController::OnProjectileHitHandler()
 	bHasProjectileHit = true;
 	if (bRangeAttackAnimHasEnded)
 	{
-		UKismetSystemLibrary::Delay(GetWorld(), 1.0f, LatentActionInfo);
-		CurrentAttackingUnit->EndTurn();
+		FTimerDelegate TimerCallback;
+		FTimerHandle TimerHandle;
+		TimerCallback.BindLambda([&]() {
+			CurrentAttackingUnit->EndTurn();
+		});
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerCallback, 1.0f, false);
 	}
 }
 
@@ -568,7 +578,7 @@ void ABattleController::ShowSkills(APlayerUnitBase *PlayerUnit)
 
 void ABattleController::OnSkillSelectedHandler(TSubclassOf<ABattleSkillBase> SelectedSkill)
 {
-	if(IsUnitHasEnoughMP(SelectedSkill))
+	if (IsUnitHasEnoughMP(SelectedSkill))
 	{
 		BattleUI->OnSkillSelected.RemoveAll(this);
 		BattleUI->OnUnitHasEnoughMP();
@@ -698,7 +708,7 @@ void ABattleController::OnItemUsedHandler()
 {
 	BattleUI->OnItemUsed.RemoveAll(this);
 	Cast<APlayerUnitBase>(CurrentAttackingUnit.Get())->RemoveUI();
-	TSubclassOf<APlayerUnitBase> UnitClass;
+	TSubclassOf<APlayerUnitBase> UnitClass = CurrentAttackingUnit->GetClass();
 	UseItem(CurrentAttackingUnit->GetCurrentTarget(), UnitClass);
 }
 
@@ -706,6 +716,7 @@ void ABattleController::UseItem(AUnitBase *TargetUnit, TSubclassOf<APlayerUnitBa
 {
 	CurrentUsableItem->OnItemUsed.AddUObject(this, &ABattleController::OnItemUsed);
 	CurrentUsableItem->Use(this, PlayerController.Get(), true, TargetUnit, UnitClass);
+	BattleUI->UseItem();
 }
 
 void ABattleController::OnItemUsed()
@@ -757,8 +768,66 @@ void ABattleController::ChangeMapForBattle()
 
 bool ABattleController::DealDamage(int PureDamage, float DamageMultiplier)
 {
-	bool bIsHit = false;
+	int Damage = CalculateDamage(PureDamage, DamageMultiplier);
+	FTransform HitTransform;
+	HitTransform.SetLocation(CurrentTargetUnit->GetProjectileHitLocation()->GetComponentLocation());
+	ADamageText *DamageText = GetWorld()->SpawnActor<ADamageText>(DamageTextClass, HitTransform);
+	DamageText->CreateTextWidget(Damage, CurrentTargetUnit.Get());
+	CurrentTargetUnit->ReceiveDamage(Damage);
+	bool bIsHit = Damage > 0;
 	return bIsHit;
+}
+
+int ABattleController::CalculateDamage(int PureDamage, float DamageMultiplier)
+{
+	if (!IsHit())
+		return 0;
+	int Damage;
+	int PhysDamage = UKismetMathLibrary::RandomIntegerInRange(CurrentAttackingUnit->GetMinAttack(), CurrentAttackingUnit->GetMaxAttack());
+	PhysDamage -= CurrentTargetUnit->GetDefense();
+	if (PhysDamage < 1)
+		PhysDamage = 1;
+	if (CurrentSkill.IsValid())
+	{
+		int MagicalDamage = UKismetMathLibrary::RandomIntegerInRange(CurrentAttackingUnit->GetMinMagicalAttack(), CurrentAttackingUnit->GetMaxMagicalAttack());
+		MagicalDamage -= CurrentTargetUnit->GetMagicDefense();
+		if (MagicalDamage < 1)
+			MagicalDamage = 1;
+		switch (CurrentSkill->GetDamageType())
+		{
+		case EDamageType::Physical:
+			Damage = FMath::CeilToInt(PhysDamage * DamageMultiplier);
+			break;
+		case EDamageType::Magical:
+			Damage = FMath::CeilToInt(MagicalDamage * DamageMultiplier);
+			break;
+		case EDamageType::Pure:
+			Damage = PureDamage;
+			break;
+		}
+	}
+	else
+	{
+		Damage = FMath::CeilToInt(PhysDamage * DamageMultiplier);
+	}
+	return Damage;
+}
+
+bool ABattleController::IsHit()
+{
+	bool Result = false;
+	float AttackerHit = CurrentAttackingUnit->GetHit();
+	float TargetSpeed = CurrentTargetUnit->GetSpeed();
+	float HitChance = ((AttackerHit - TargetSpeed) / (AttackerHit / 2)) * 100;
+	if (CurrentSkill.IsValid() && CurrentSkill->IsAlwaysHits())
+	{
+		Result = true;
+	}
+	else
+	{
+		Result = HitChance > UKismetMathLibrary::RandomFloatInRange(0.0f, 100.0f);
+	}
+	return Result;
 }
 
 TSubclassOf<ABattleTransitionBase> ABattleController::GetBattleTransitionClass()
