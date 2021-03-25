@@ -20,7 +20,7 @@ class JRPG_LEARN_API ABattleTransitionBase : public AActor
 
 	OnTransitionEndedSignature OnTransitionEnded;
 
-	void StartTransition();
+	virtual void StartTransition();
 
 	void SetPlayerController(AJRPG_PlayerController *);
 	void SetBattle(ABattleBase *);

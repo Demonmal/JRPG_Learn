@@ -752,8 +752,12 @@ void ABattleController::StartTransition()
 	CurrentBattleTransition->OnTransitionEnded.AddUObject(this, &ABattleController::OnTransitionEndedHandler);
 	PlayerController->ChangeGameState(EGameState::BattleTransition);
 	CurrentBattleTransition->StartTransition();
-	UKismetSystemLibrary::Delay(GetWorld(), 0.1f, LatentActionInfo);
-	SwitchToBattleMode();
+	FTimerDelegate TimerCallback;
+    FTimerHandle TimerHandle;
+    TimerCallback.BindLambda([&]() {
+        SwitchToBattleMode();
+    });
+    GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerCallback, 0.1f, false);	
 }
 
 void ABattleController::OnTransitionEndedHandler()
@@ -849,9 +853,7 @@ bool ABattleController::SwitchToStaticCamera()
 	AActor *StaticCamera = CurrentBattle->GetStaticCamera();
 	if (IsValid(StaticCamera))
 	{
-		UE_LOG(LogTemp, Log, TEXT("ABattleController::SwitchToStaticCamera"))
-		//PlayerController->SetViewTargetWithBlend(StaticCamera, 0.5f, EViewTargetBlendFunction::VTBlend_Cubic);
-		PlayerController->SetViewTarget(StaticCamera);
+		PlayerController->SetViewTargetWithBlend(StaticCamera, 0.5f, EViewTargetBlendFunction::VTBlend_Cubic);
 		Result = true;
 	}
 	return Result;
