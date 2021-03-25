@@ -185,6 +185,7 @@ void AJRPG_PlayerController::BeginPlay()
     UJRPG_GameInstance *GameInstance = Cast<UJRPG_GameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
     AudioController = GameInstance->AudioPlayerController(GetWorld());
     SetUnitsStartingStats();
+    SetPartyMembers();
     SetExploreCharacter();
 }
 
@@ -217,16 +218,11 @@ void AJRPG_PlayerController::SetUnitsStartingStats()
 void AJRPG_PlayerController::SetPartyMembers()
 {
     TArray<TSubclassOf<APlayerUnitBase>> Units;
-    TSubclassOf<APlayerUnitBase> LeaderUnitClass = ExploreCharacter->GetPlayerUnit();
-    PartyMembers.Add(LeaderUnitClass);
     int KeysCount = PlayerUnits.GetKeys(Units);
-    int LeaderIndex = Units.Find(LeaderUnitClass);
     for (int i{0}; i < KeysCount; i++)
     {
         if (PartyMembers.Num() == PartySize)
             break;
-        if (i == LeaderIndex)
-            continue;
         PartyMembers.Add(Units[i]);
     }
 }
@@ -250,35 +246,38 @@ void AJRPG_PlayerController::SetExploreCharacter()
 
 void AJRPG_PlayerController::ShowPartyLeader()
 {
-    // APlayerUnitBase *PartyLeaderDefault = Cast<APlayerUnitBase>(PartyMembers[0]->GetDefaultObject());
-    // if (ExploreCharacter.IsValid())
-    // {
-    //     if (ExploreCharacter->StaticClass() == PartyLeaderDefault->GetExploreCharacter())
-    //     {
-    //         ExploreCharacter->RemoveAllEquipmentMesh();
-    //         ShowAllEquipmentMeshes(ExploreCharacter.Get());
-    //         return;
-    //     }
-    // }
-    // FTransform SpawnTransform = GetExploreCharacterTransform();
-    // FActorSpawnParameters SpawnParameters;
-    // SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-    // AJRPG_CharacterBase *CreatedCharacter = GetWorld()->SpawnActor<AJRPG_CharacterBase>(PartyLeaderDefault->GetExploreCharacter(), SpawnTransform, SpawnParameters);
-    // if (ExploreCharacter.IsValid())
-    // {
-    //     PartyMemberCharacters.Remove(ExploreCharacter.Get());
-    //     ExploreCharacter->RemoveAllEquipmentMesh();
-    //     ExploreCharacter->Destroy();
-    // }
-    // else
-    // {
-    //     UGameplayStatics::GetPlayerPawn(GetWorld(), 0)->Destroy();
-    // }
-    // ExploreCharacter = CreatedCharacter;
-    ExploreCharacter = Cast<AJRPG_CharacterBase>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
+    APlayerUnitBase *PartyLeaderDefault = Cast<APlayerUnitBase>(PartyMembers[0]->GetDefaultObject());
+    if (ExploreCharacter.IsValid() && ExploreCharacter->GetClass() == PartyLeaderDefault->GetExploreCharacter())
+    {
+        ExploreCharacter->RemoveAllEquipmentMesh();
+    }
+    else
+    {
+        FTransform SpawnTransform = GetExploreCharacterTransform();
+        FActorSpawnParameters SpawnParameters;
+        SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+        AJRPG_CharacterBase *CreatedCharacter = GetWorld()->SpawnActor<AJRPG_CharacterBase>(PartyLeaderDefault->GetExploreCharacter(), SpawnTransform, SpawnParameters);
+        if (ExploreCharacter.IsValid())
+        {
+            if (PartyMemberCharacters.Contains(ExploreCharacter.Get()))
+            {
+                PartyMemberCharacters.Remove(ExploreCharacter.Get());
+            }
+            ExploreCharacter->RemoveAllEquipmentMesh();
+            ExploreCharacter->Destroy();
+        }
+        else
+        {
+            UGameplayStatics::GetPlayerPawn(GetWorld(), 0)->Destroy();
+        }
+        ExploreCharacter = CreatedCharacter;
+        Possess(CreatedCharacter);
+    }
     ExploreCharacter->SetAI(false);
-    PartyMemberCharacters.Add(ExploreCharacter.Get());
-    SetPartyMembers();
+    if (!PartyMemberCharacters.Contains(ExploreCharacter.Get()))
+    {
+        PartyMemberCharacters.Add(ExploreCharacter.Get());
+    }
     BindOverlapEvents();
     RefreshInteractions();
     ShowAllEquipmentMeshes(ExploreCharacter.Get());
@@ -315,7 +314,7 @@ void AJRPG_PlayerController::RemovePartyMemberCharacters()
 {
     for (int i{PartyMemberCharacters.Num() - 1}; i >= 0; i--)
     {
-        if (PartyMemberCharacters[i] != ExploreCharacter)
+        if (PartyMemberCharacters[i] != ExploreCharacter.Get())
         {
             if (IsValid(PartyMemberCharacters[i]))
             {
@@ -475,7 +474,7 @@ void AJRPG_PlayerController::RefreshBattleInteractions()
     for (auto Component : OverlappingComponents)
     {
         ABattleBase *InteractedBattle = Cast<ABattleBase>(Component->GetOwner());
-        if(IsValid(InteractedBattle))
+        if (IsValid(InteractedBattle))
         {
             InteractedBattle->OverlapStarted();
             break;
@@ -658,21 +657,21 @@ void AJRPG_PlayerController::PlaySound2DByTag(FName Tag)
     AudioController->PlaySoundByTag(Tag);
 }
 
-void AJRPG_PlayerController::UpdatePlayerUnitsData(int TotalExp, TArray<APlayerUnitBase*> AliveUnits, TArray<TSubclassOf<APlayerUnitBase>> DeadUnits)
+void AJRPG_PlayerController::UpdatePlayerUnitsData(int TotalExp, TArray<APlayerUnitBase *> AliveUnits, TArray<TSubclassOf<APlayerUnitBase>> DeadUnits)
 {
     FPlayerUnitData PlayerUnitData;
-    for(auto Unit : AliveUnits)
+    for (auto Unit : AliveUnits)
     {
-        if(TryGetUnitDataByPlayer(Unit->GetClass(), PlayerUnitData))
+        if (TryGetUnitDataByPlayer(Unit->GetClass(), PlayerUnitData))
         {
             PlayerUnitData.Exp += TotalExp / AliveUnits.Num();
             PlayerUnitData.CurrentHP = Unit->GetCurrentHP();
             PlayerUnitData.CurrentMP = Unit->GetCurrentMP();
         }
     }
-    for(const auto& DeadUnitClass : DeadUnits)
+    for (const auto &DeadUnitClass : DeadUnits)
     {
-        if(TryGetUnitDataByPlayer(DeadUnitClass, PlayerUnitData))
+        if (TryGetUnitDataByPlayer(DeadUnitClass, PlayerUnitData))
         {
             PlayerUnitData.CurrentHP = 0;
             PlayerUnitData.CurrentMP = 0;

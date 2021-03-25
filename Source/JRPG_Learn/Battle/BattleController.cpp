@@ -120,6 +120,10 @@ void ABattleController::SwitchToExploreMode()
 	CurrentBattle->RemoveBattle();
 	PlayerController->Possess(ExploreCharacter.Get());
 	PlayerController->OnBattleOver();
+	if(IsValid(BattleUI))
+	{
+		BattleUI->RemoveFromParent();
+	}
 	PlayerController->PlayerCameraManager->StartCameraFade(1.0f, 0.0f, 2.0f, FLinearColor::Black, false, true);
 	VictoryThemeAudio->FadeOut(1.0f, 0.0f);
 	PlayExploreTheme();
