@@ -15,6 +15,6 @@ void UMPBar::SetUnit(AUnitBase* Unit)
 
 void UMPBar::OnMPSetHandler(int MP)
 {
-    MPBar->SetPercent(MP/CachedUnit->GetMaxMP());
+    MPBar->SetPercent(static_cast<float>(MP)/CachedUnit->GetMaxMP());
     MPText->SetText(FText::AsNumber(MP));
 }

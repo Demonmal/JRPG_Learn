@@ -15,6 +15,6 @@ void UHPBar::SetUnit(AUnitBase* Unit)
 
 void UHPBar::OnHPSetHandler(int HP)
 {
-    HPBar->SetPercent(HP/CachedUnit->GetMaxHP());
+    HPBar->SetPercent(static_cast<float>(HP)/CachedUnit->GetMaxHP());
     HPText->SetText(FText::AsNumber(HP));
 }
