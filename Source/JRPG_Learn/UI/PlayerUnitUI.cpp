@@ -9,6 +9,7 @@
 #include "HPBar.h"
 #include "MPBar.h"
 #include "ActionTimeBar.h"
+#include "TimerManager.h"
 
 void UPlayerUnitUI::Init(ABattleController *BattleController)
 {
@@ -41,7 +42,10 @@ void UPlayerUnitUI::OnTurnEndedHandler()
 
 void UPlayerUnitUI::OnUnitDiedHandler(AUnitBase* DiedUnit)
 {
-    FLatentActionInfo LatentActionInfo;
-    UKismetSystemLibrary::Delay(GetWorld(), 1.0f, LatentActionInfo);
-    RemoveFromParent();
+    FTimerDelegate TimerCallback;
+	FTimerHandle TimerHandle;
+	TimerCallback.BindLambda([&]() {
+		RemoveFromParent();
+	});
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerCallback, 1.0f, false);    
 }

@@ -6,23 +6,27 @@
 #include "../Battle/BattleController.h"
 #include "../Controllers/JRPG_PlayerController.h"
 #include "../Controllers/JRPG_FunctionLibrary.h"
+#include "TimerManager.h"
 
 void ABasicHeal::UseSkill()
 {
     BattleController->GetCurrentTargetUnit()->Heal(HealAmount);
     PlayerController->PlaySound2DByTag(SoundTag);
-    FLatentActionInfo LatentActionInfo;
-    UKismetSystemLibrary::Delay(GetWorld(), DelayAfterUsage, LatentActionInfo);
-    if (OnSkillUsed.IsBound())
-    {
-        OnSkillUsed.Broadcast();
-    }
+    FTimerDelegate TimerCallback;
+    FTimerHandle TimerHandle;
+    TimerCallback.BindLambda([&]() {
+        if (OnSkillUsed.IsBound())
+        {
+            OnSkillUsed.Broadcast();
+        }
+    });
+    GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerCallback, DelayAfterUsage, false);
 }
 
 void ABasicHeal::UseBattleSkillInExplore(TSubclassOf<APlayerUnitBase> TargetUnit)
 {
-    FPlayerUnitData  PlayerUnitData;
-    if(PlayerController->TryGetUnitDataByPlayer(TargetUnit, PlayerUnitData))
+    FPlayerUnitData PlayerUnitData;
+    if (PlayerController->TryGetUnitDataByPlayer(TargetUnit, PlayerUnitData))
     {
         int Level;
         FUnitStats UnitStats = UJRPG_FunctionLibrary::GetPlayerUnitStatsFromData(TargetUnit, PlayerUnitData, Level);

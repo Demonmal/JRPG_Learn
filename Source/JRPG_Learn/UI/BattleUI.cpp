@@ -28,8 +28,6 @@ void UBattleUI::HideBattleUI()
 {
     PlayAnimation(ShowPlayerUnitListUIAnim, .0f, 1, EUMGSequencePlayMode::Reverse);
     PlayAnimation(ShowTurnOrderUI, .0f, 1, EUMGSequencePlayMode::Reverse);
-    FLatentActionInfo LatentActionInfo;
-    UKismetSystemLibrary::Delay(GetWorld(), .1f, LatentActionInfo);
     RemoveFromParent();
 }
 

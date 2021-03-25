@@ -11,6 +11,7 @@
 #include "../../Battle/BattleController.h"
 #include "../../Battle/BattleBase.h"
 #include "../../UI/EnemyUnitUI.h"
+#include "TimerManager.h"
 
 AEnemyUnitBase::AEnemyUnitBase() : AUnitBase::AUnitBase()
 {
@@ -47,25 +48,25 @@ void AEnemyUnitBase::StopRotateUnitUIToCamera()
 void AEnemyUnitBase::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
-    if(!bRotateUnitUIToCamera)
+    if (!bRotateUnitUIToCamera)
         return;
     EnemyUnitWidget->SetWorldRotation(UKismetMathLibrary::FindLookAtRotation(EnemyUnitWidget->GetComponentLocation(), PlayerController->PlayerCameraManager->GetCameraLocation()));
 }
 
 void AEnemyUnitBase::StartTurn()
 {
-    if(IsUnitDead())
+    if (IsUnitDead())
     {
         AUnitBase::StartTurn();
     }
     else
     {
-        if(OnTurnStarted.IsBound())
+        if (OnTurnStarted.IsBound())
         {
             OnTurnStarted.Broadcast();
         }
         TSubclassOf<ABattleSkillBase> RandomSkill = GetRandomSkill();
-        if(UKismetSystemLibrary::IsValidClass(RandomSkill))
+        if (UKismetSystemLibrary::IsValidClass(RandomSkill))
         {
             BattleController->EnemyPrepareForSkill(RandomSkill);
         }
@@ -77,8 +78,12 @@ void AEnemyUnitBase::StartTurn()
             FocusOnTarget(RotatorToTarget);
             CurrentTarget->AdjustAttackerLocation(this);
             BattleController->AdjustCamera(Cast<APlayerUnitBase>(CurrentTarget.Get()), this, false);
-            UKismetSystemLibrary::Delay(GetWorld(), 0.5f, LatentActionInfo);
-            BattleController->Attack(CurrentTarget.Get());
+            FTimerDelegate TimerCallback;
+            FTimerHandle TimerHandle;
+            TimerCallback.BindLambda([&]() {
+                BattleController->Attack(CurrentTarget.Get());
+            });
+            GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerCallback, 0.5f, false);
         }
     }
 }
@@ -86,7 +91,7 @@ void AEnemyUnitBase::StartTurn()
 void AEnemyUnitBase::Die()
 {
     AUnitBase::Die();
-    if(IsValid(EnemyUnitWidget))
+    if (IsValid(EnemyUnitWidget))
     {
         EnemyUnitWidget->SetVisibility(false);
     }
@@ -96,15 +101,19 @@ void AEnemyUnitBase::AdjustCameraForSkill(AUnitBase *TargetUnit)
 {
     CurrentTarget = TargetUnit;
     APlayerUnitBase *PlayerUnit = Cast<APlayerUnitBase>(TargetUnit);
-    if(PlayerUnit)
+    if (PlayerUnit)
     {
         BattleController->AdjustCamera(PlayerUnit, this, false);
         FRotator RotatorToTarget = UKismetMathLibrary::FindLookAtRotation(SkeletalMesh->GetComponentLocation(), CurrentTarget->GetActorLocation());
         RotatorToTarget.Yaw -= 90.0f;
         FocusOnTarget(RotatorToTarget);
         CurrentTarget->AdjustAttackerLocation(this);
-        UKismetSystemLibrary::Delay(GetWorld(), 0.5f, LatentActionInfo);
-        BattleController->EnemyUseSkill();
+        FTimerDelegate TimerCallback;
+        FTimerHandle TimerHandle;
+        TimerCallback.BindLambda([&]() {
+            BattleController->EnemyUseSkill();
+        });
+        GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerCallback, 0.5f, false);
     }
     else
     {
@@ -116,7 +125,7 @@ void AEnemyUnitBase::AdjustFrontCamera()
 {
     SwitchToFrontCamera(false);
     UKismetSystemLibrary::Delay(GetWorld(), 1.0f, LatentActionInfo);
-    if(CurrentTarget.Get() != this)
+    if (CurrentTarget.Get() != this)
     {
         FRotator RotatorToTarget = UKismetMathLibrary::FindLookAtRotation(SkeletalMesh->GetComponentLocation(), CurrentTarget->GetActorLocation());
         RotatorToTarget.Yaw -= 90.0f;
@@ -133,7 +142,7 @@ AUnitBase *AEnemyUnitBase::GetTargetUnit(bool bIsPlayer)
     ABattleBase *CurrentBattle = BattleController->GetCurrentBattle();
     AUnitBase *Target;
     int Index;
-    if(bIsPlayer)
+    if (bIsPlayer)
     {
         Index = UKismetMathLibrary::RandomIntegerInRange(0, CurrentBattle->GetPlayerUnits().Num() - 1);
         Target = Cast<AUnitBase>(CurrentBattle->GetPlayerUnits()[Index]);
@@ -144,25 +153,25 @@ AUnitBase *AEnemyUnitBase::GetTargetUnit(bool bIsPlayer)
         Target = Cast<AUnitBase>(CurrentBattle->GetEnemyUnits()[Index]);
     }
     return Target;
-}   
+}
 
 TSubclassOf<ABattleSkillBase> AEnemyUnitBase::GetRandomSkill()
 {
     float TotalWeight = 0.0f;
-    for(const auto& Pair : Skills)
+    for (const auto &Pair : Skills)
     {
         TotalWeight += Pair.Value;
     }
     float RandomWeight = UKismetMathLibrary::RandomFloatInRange(0, TotalWeight);
     float CurrentWeight = 0.0f;
     TSubclassOf<ABattleSkillBase> Result;
-    for(const auto& Pair : Skills)
+    for (const auto &Pair : Skills)
     {
         float MaxSkillWeight = CurrentWeight + Pair.Value;
-        if(RandomWeight <= MaxSkillWeight)
+        if (RandomWeight <= MaxSkillWeight)
         {
             Result = Pair.Key;
-            break; 
+            break;
         }
         CurrentWeight = MaxSkillWeight;
     }

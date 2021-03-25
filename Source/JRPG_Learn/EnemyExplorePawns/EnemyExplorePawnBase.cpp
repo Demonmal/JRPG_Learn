@@ -55,7 +55,6 @@ void AEnemyExplorePawnBase::StartBattle()
 {
 	Battle->StartBattle(EnemyList, OverrideOffLevelBattleData);
 	FLatentActionInfo LatentActionInfo;
-	UKismetSystemLibrary::Delay(GetWorld(), 0.1f, LatentActionInfo);
 	Destroy();
 }
 

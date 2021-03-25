@@ -54,7 +54,6 @@ void ABattleController::BeginPlay()
 		GameInstance->SetBattleControllerInstance(this);
 		if (GameInstance->GetShouldLoadGame())
 		{
-			UKismetSystemLibrary::Delay(GetWorld(), 0.1f, LatentActionInfo);
 			GameInstance->LoadGame();
 		}
 	}
@@ -120,9 +119,9 @@ void ABattleController::SwitchToExploreMode()
 	CurrentBattle->RemoveBattle();
 	PlayerController->Possess(ExploreCharacter.Get());
 	PlayerController->OnBattleOver();
-	if(IsValid(BattleUI))
+	if (IsValid(BattleUI))
 	{
-		BattleUI->RemoveFromParent();
+		BattleUI->HideBattleUI();
 	}
 	PlayerController->PlayerCameraManager->StartCameraFade(1.0f, 0.0f, 2.0f, FLinearColor::Black, false, true);
 	VictoryThemeAudio->FadeOut(1.0f, 0.0f);
@@ -274,20 +273,24 @@ void ABattleController::PlayerWon()
 	AddUsableItemsToPlayerInventory();
 	AddMiscItemsToPlayerInventory();
 	AddEquipmentToPlayerInventory();
-	UKismetSystemLibrary::Delay(GetWorld(), 1.0f, LatentActionInfo);
-	UVictoryDialogue *VictoryDialogue = CreateWidget<UVictoryDialogue>(GetWorld(), VictoryDialogueClass);
-	VictoryDialogue->ExpReward = CurrentBattle->GetTotalExpReward();
-	VictoryDialogue->GoldReward = CurrentBattle->GetTotalGoldReward();
-	VictoryDialogue->UsableItemDrops = CurrentBattle->GetUsableItemDrops();
-	VictoryDialogue->MiscItemDrops = CurrentBattle->GetMiscItemDrops();
-	VictoryDialogue->EquipmentDrops = CurrentBattle->GetEquipmentDrops();
-	VictoryDialogue->AddToViewport();
-	VictoryDialogue->OnContinueClicked.AddUObject(this, &ABattleController::OnContinueClickedHandler);
-	if (IsValid(VictoryTheme))
-	{
-		VictoryThemeAudio->SetSound(VictoryTheme);
-		VictoryThemeAudio->Play();
-	}
+	FTimerDelegate TimerCallback;
+	FTimerHandle TimerHandle;
+	TimerCallback.BindLambda([&]() {
+		UVictoryDialogue *VictoryDialogue = CreateWidget<UVictoryDialogue>(GetWorld(), VictoryDialogueClass);
+		VictoryDialogue->ExpReward = CurrentBattle->GetTotalExpReward();
+		VictoryDialogue->GoldReward = CurrentBattle->GetTotalGoldReward();
+		VictoryDialogue->UsableItemDrops = CurrentBattle->GetUsableItemDrops();
+		VictoryDialogue->MiscItemDrops = CurrentBattle->GetMiscItemDrops();
+		VictoryDialogue->EquipmentDrops = CurrentBattle->GetEquipmentDrops();
+		VictoryDialogue->AddToViewport();
+		VictoryDialogue->OnContinueClicked.AddUObject(this, &ABattleController::OnContinueClickedHandler);
+		if (IsValid(VictoryTheme))
+		{
+			VictoryThemeAudio->SetSound(VictoryTheme);
+			VictoryThemeAudio->Play();
+		}
+	});
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerCallback, 1.0f, false);
 }
 
 void ABattleController::OnContinueClickedHandler()
@@ -373,9 +376,13 @@ void ABattleController::OnLevelUpContinueClickedHandler()
 
 void ABattleController::EnemyWon()
 {
-	UKismetSystemLibrary::Delay(GetWorld(), 2.0f, LatentActionInfo);
-	UDefeatDialogue *DefeatDialogue = CreateWidget<UDefeatDialogue>(GetWorld(), DefeatDialogueClass);
-	DefeatDialogue->AddToViewport();
+	FTimerDelegate TimerCallback;
+	FTimerHandle TimerHandle;
+	TimerCallback.BindLambda([&]() {
+		UDefeatDialogue *DefeatDialogue = CreateWidget<UDefeatDialogue>(GetWorld(), DefeatDialogueClass);
+		DefeatDialogue->AddToViewport();
+	});
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerCallback, 2.0f, false);
 }
 
 void ABattleController::AddUsableItemsToPlayerInventory()
@@ -685,7 +692,6 @@ void ABattleController::OnItemSelectedHandler(TSubclassOf<AItemBase> SelectedIte
 			Cast<APlayerUnitBase>(CurrentAttackingUnit.Get())->ChangeTargetForUseItem();
 			break;
 		case EUnitFilter::Dead:
-			UKismetSystemLibrary::Delay(GetWorld(), .1f, LatentActionInfo);
 
 			break;
 		}

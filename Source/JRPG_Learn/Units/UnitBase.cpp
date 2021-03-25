@@ -18,6 +18,7 @@
 #include "../Controllers/JRPG_FunctionLibrary.h"
 #include "../Controllers/JRPG_PlayerController.h"
 #include "../UI/TargetIcon.h"
+#include "TimerManager.h"
 
 // Sets default values
 AUnitBase::AUnitBase()
@@ -308,16 +309,22 @@ void AUnitBase::SetMP(int ManaAmount)
 
 void AUnitBase::Die()
 {
-	FLatentActionInfo LatentActionInfo;
-	UKismetSystemLibrary::Delay(GetWorld(), DieAnim->SequenceLength, LatentActionInfo);
-	OnDied();
+	FTimerDelegate TimerCallback;
+    FTimerHandle TimerHandle;
+    TimerCallback.BindLambda([&]() {
+       OnDied();
+    });
+    GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerCallback, DieAnim->SequenceLength, false);
 }
 
 void AUnitBase::OnDied()
 {
-	FLatentActionInfo LatentActionInfo;
-	UKismetSystemLibrary::Delay(GetWorld(), DelayBeforeDie, LatentActionInfo);
-	Destroy();
+	FTimerDelegate TimerCallback;
+    FTimerHandle TimerHandle;
+    TimerCallback.BindLambda([&]() {
+       Destroy();
+    });
+    GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerCallback, DelayBeforeDie, false);
 }
 
 float AUnitBase::PlayAnimMontage(UAnimMontage *AnimMontage, float InPlayRate , FName StartSectionName)

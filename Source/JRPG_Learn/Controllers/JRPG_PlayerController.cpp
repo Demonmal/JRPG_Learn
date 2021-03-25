@@ -18,6 +18,7 @@
 #include "../Items/UsableItems/UsableItemBase.h"
 #include "../Items/MiscItems/MiscItemBase.h"
 #include "../Battle/BattleBase.h"
+#include "TimerManager.h"
 
 void AJRPG_PlayerController::SetPawn(APawn *InPawn)
 {
@@ -114,8 +115,6 @@ void AJRPG_PlayerController::PossessNextCharacter()
     {
         UnbindOverlapEvents();
         int NextCharacterNumber = CurrentCharacterNumber + 1 > PartyMemberCharacters.Num() - 1 ? 0 : CurrentCharacterNumber + 1;
-        UnPossess();
-        ExploreCharacter->SetAI(true);
         ExploreCharacter = PartyMemberCharacters[NextCharacterNumber];
         OnNewCharacterPossessed();
     }
@@ -132,8 +131,6 @@ void AJRPG_PlayerController::PossessPreviousCharacter()
     {
         UnbindOverlapEvents();
         int PrevCharacterNumber = CurrentCharacterNumber - 1 >= 0 ? CurrentCharacterNumber - 1 : PartyMemberCharacters.Num() - 1;
-        ExploreCharacter->SetAI(true);
-        UnPossess();
         ExploreCharacter = PartyMemberCharacters[PrevCharacterNumber];
         OnNewCharacterPossessed();
     }
@@ -155,14 +152,21 @@ void AJRPG_PlayerController::OnNewCharacterPossessed()
     {
         OnPossessedCharacter.Broadcast();
     }
+    bIsInputBlocked = true;
     SetViewTargetWithBlend(ExploreCharacter.Get(), BlendTimeToNewCharacter, EViewTargetBlendFunction::VTBlend_Cubic, .0f, true);
-    FLatentActionInfo ActionInfo;
-    UKismetSystemLibrary::Delay(GetWorld(), BlendTimeToNewCharacter, ActionInfo);
-    Possess(ExploreCharacter.Get());
-    ExploreCharacter->SetAI(false);
-    RefreshInteractions();
-    RefreshBattleInteractions();
-    SetPartyLeaderForAICharacters();
+    FTimerDelegate TimerCallback;
+    FTimerHandle TimerHandle;
+    TimerCallback.BindLambda([&]() {
+        bIsInputBlocked = false;
+        UnPossess();
+        Possess(ExploreCharacter.Get());
+        ExploreCharacter->SetAI(false);
+        BindOverlapEvents();
+        RefreshInteractions();
+        RefreshBattleInteractions();
+        SetPartyLeaderForAICharacters();
+    });
+    GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerCallback, BlendTimeToNewCharacter, false);
 }
 
 void AJRPG_PlayerController::SetPartyLeaderForAICharacters()
