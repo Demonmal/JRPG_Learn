@@ -12,6 +12,8 @@ class AEquipmentBase;
 class UWidgetAnimation;
 class UOverlay;
 class UActionButton;
+class UScrollBox;
+class UItemButton;
 
 DECLARE_MULTICAST_DELEGATE(FOnContinueClickedSignature);
 
@@ -25,21 +27,26 @@ class JRPG_LEARN_API UVictoryDialogue : public UUIBase
 
 	FOnContinueClickedSignature OnContinueClicked;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TSubclassOf<UItemButton> ItemButtonClass;
+
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	UActionButton* BP_ActionButton;
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	UOverlay* DropsOverlay;
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	UScrollBox* ItemList;
 
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidgetAnim))
 	UWidgetAnimation* VictoryAnim;
 	 
 	UFUNCTION(BlueprintCallable)
 	void ShowItemsObtained();
-	UFUNCTION(BlueprintImplementableEvent)
+	UFUNCTION(BlueprintCallable)
 	void ShowUsableItemDrops();
-	UFUNCTION(BlueprintImplementableEvent)
+	UFUNCTION(BlueprintCallable)
 	void ShowMiscItemDrops();
-	UFUNCTION(BlueprintImplementableEvent)
+	UFUNCTION(BlueprintCallable)
 	void ShowEquipmentDrops();
 	UFUNCTION(BlueprintCallable)
 	void OnConfirm();

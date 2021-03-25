@@ -97,12 +97,6 @@ protected:
 	UPROPERTY(EditAnywhere)
 	float FleeChance;
 	UPROPERTY(EditAnywhere)
-	TMap<TSubclassOf<AUsableItemBase>, int> UsableItemDrops;
-	UPROPERTY(EditAnywhere)
-	TMap<TSubclassOf<AMiscItemBase>, int> MiscItemDrops;
-	UPROPERTY(EditAnywhere)
-	TMap<TSubclassOf<AEquipmentBase>, int> EquipmentDrops;
-	UPROPERTY(EditAnywhere)
 	TArray<AUnitSpawnLocation*> PlayerSpawnLocations;
 	UPROPERTY(EditAnywhere)
 	TArray<AUnitSpawnLocation*> EnemySpawnLocations;
@@ -119,6 +113,12 @@ protected:
 	TMap<TSubclassOf<APlayerUnitBase>, int> PlayerUnitLevels;
 	UPROPERTY()
 	TMap<TSubclassOf<APlayerUnitBase>, FTransform> DeadPlayerUnits;
+	UPROPERTY()
+	TMap<TSubclassOf<AUsableItemBase>, int> UsableItemDrops;
+	UPROPERTY()
+	TMap<TSubclassOf<AMiscItemBase>, int> MiscItemDrops;
+	UPROPERTY()
+	TMap<TSubclassOf<AEquipmentBase>, int> EquipmentDrops;
 
 	int TotalExpReward;
 	int TotalGoldReward;

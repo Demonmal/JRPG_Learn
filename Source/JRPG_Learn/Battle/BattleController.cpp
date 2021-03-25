@@ -130,7 +130,6 @@ void ABattleController::SwitchToExploreMode()
 
 void ABattleController::StartBattle()
 {
-	UE_LOG(LogTemp, Log, TEXT("ABattleController::StartBattle"))
 	IncreaseTurnCount();
 	PlayBattleTheme();
 	CurrentBattle->InitUnits();
@@ -279,6 +278,7 @@ void ABattleController::PlayerWon()
 		UVictoryDialogue *VictoryDialogue = CreateWidget<UVictoryDialogue>(GetWorld(), VictoryDialogueClass);
 		VictoryDialogue->ExpReward = CurrentBattle->GetTotalExpReward();
 		VictoryDialogue->GoldReward = CurrentBattle->GetTotalGoldReward();
+		UE_LOG(LogTemp, Log, TEXT("VictoryDialogue->UsableItemDrops %i"), CurrentBattle->GetUsableItemDrops().Num());
 		VictoryDialogue->UsableItemDrops = CurrentBattle->GetUsableItemDrops();
 		VictoryDialogue->MiscItemDrops = CurrentBattle->GetMiscItemDrops();
 		VictoryDialogue->EquipmentDrops = CurrentBattle->GetEquipmentDrops();
