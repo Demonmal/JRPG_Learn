@@ -497,13 +497,16 @@ void ABattleController::RangeAttack()
 	MontageNotifyDelegate.BindUFunction(this, "OnRangeAttackAnimMontageNotified");
 	CurrentAttackingUnit->GetAnimInstance()->OnPlayMontageNotifyBegin.Add(MontageNotifyDelegate);
 	CurrentAttackingUnit->PlayAnimMontage(AttackAnimMontage);
-	UKismetSystemLibrary::Delay(GetWorld(), AttackAnimMontage->SequenceLength, LatentActionInfo);
-	bRangeAttackAnimHasEnded = true;
-	if (bHasProjectileHit)
-	{
-		UKismetSystemLibrary::Delay(GetWorld(), 1.0f, LatentActionInfo);
-		CurrentAttackingUnit->EndTurn();
-	}
+	FTimerDelegate TimerCallback;
+	FTimerHandle TimerHandle;
+	TimerCallback.BindLambda([&]() {
+		bRangeAttackAnimHasEnded = true;
+		if (bHasProjectileHit)
+		{
+			CurrentAttackingUnit->EndTurn();
+		}
+	});
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerCallback, AttackAnimMontage->SequenceLength, false);
 }
 
 void ABattleController::MeleeAttack()
@@ -753,11 +756,11 @@ void ABattleController::StartTransition()
 	PlayerController->ChangeGameState(EGameState::BattleTransition);
 	CurrentBattleTransition->StartTransition();
 	FTimerDelegate TimerCallback;
-    FTimerHandle TimerHandle;
-    TimerCallback.BindLambda([&]() {
-        SwitchToBattleMode();
-    });
-    GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerCallback, 0.1f, false);	
+	FTimerHandle TimerHandle;
+	TimerCallback.BindLambda([&]() {
+		SwitchToBattleMode();
+	});
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerCallback, 0.1f, false);
 }
 
 void ABattleController::OnTransitionEndedHandler()

@@ -663,7 +663,7 @@ void AJRPG_PlayerController::UpdatePlayerUnitsData(int TotalExp, TArray<APlayerU
     FPlayerUnitData PlayerUnitData;
     for(auto Unit : AliveUnits)
     {
-        if(TryGetUnitDataByPlayer(Unit->StaticClass(), PlayerUnitData))
+        if(TryGetUnitDataByPlayer(Unit->GetClass(), PlayerUnitData))
         {
             PlayerUnitData.Exp += TotalExp / AliveUnits.Num();
             PlayerUnitData.CurrentHP = Unit->GetCurrentHP();

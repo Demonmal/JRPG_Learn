@@ -4,13 +4,13 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Animation/AnimMontage.h"
 #include "Animation/AnimInstance.h"
-#include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "../Battle/BattleController.h"
 #include "../Battle/BattleBase.h"
 #include "../Units/UnitBase.h"
 #include "../Units/PlayerUnits/PlayerUnitBase.h"
 #include "../Units/EnemyUnits/EnemyUnitBase.h"
+#include "TimerManager.h"
 
 void ABattleSkillBase::UseBattleSkillInExplore(TSubclassOf<APlayerUnitBase> TargetUnit)
 {
@@ -23,16 +23,20 @@ void ABattleSkillBase::UseBattleSkillInExplore(TSubclassOf<APlayerUnitBase> Targ
 void ABattleSkillBase::PlaySkillAnimation()
 {
     AUnitBase *CurrentAttackingUnit = BattleController->GetCurrentAttackingUnit();
-    if (SkillAnimations.Contains(CurrentAttackingUnit->StaticClass()))
+    if (SkillAnimations.Contains(CurrentAttackingUnit->GetClass()))
     {
-        UAnimMontage *AnimMontage = SkillAnimations[CurrentAttackingUnit->StaticClass()];
-        FScriptDelegate MontageNotifyDelegate;
-        MontageNotifyDelegate.BindUFunction(this, "OnAnimMontageNotifyHandler");
-        CurrentAttackingUnit->GetAnimInstance()->OnPlayMontageNotifyBegin.Add(MontageNotifyDelegate);
+        UAnimMontage *AnimMontage = SkillAnimations[CurrentAttackingUnit->GetClass()];
+        // FScriptDelegate MontageNotifyDelegate;
+        // MontageNotifyDelegate.BindUFunction(this, "OnAnimMontageNotifyHandler");
+        // CurrentAttackingUnit->GetAnimInstance()->OnPlayMontageNotifyBegin.Add(MontageNotifyDelegate);
         CurrentAttackingUnit->PlayAnimMontage(AnimMontage);
-        FLatentActionInfo LatentActionInfo;
-        UKismetSystemLibrary::Delay(GetWorld(), AnimMontage->SequenceLength, LatentActionInfo);
-        OnSkillAnimationEnded();
+        FTimerDelegate TimerCallback;
+        FTimerHandle TimerHandle;
+        TimerCallback.BindLambda([&]() {
+            OnSkillAnimationEnded();
+        });
+        GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerCallback, AnimMontage->SequenceLength, false);      
+        UseSkillOnNotify();  
     }
     else
     {
@@ -42,6 +46,7 @@ void ABattleSkillBase::PlaySkillAnimation()
 
 void ABattleSkillBase::OnAnimMontageNotifyHandler(FName NotifyName, const FBranchingPointNotifyPayload &BranchingPointPayload)
 {
+    UE_LOG(LogTemp, Log, TEXT("ABattleSkillBase::OnAnimMontageNotifyHandler %s"), *NotifyName.ToString())
     if (NotifyName == UseSkillNotifyName)
     {
         UseSkillOnNotify();
