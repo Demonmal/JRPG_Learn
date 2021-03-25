@@ -33,6 +33,11 @@ void USkillButton::SetMPAmount()
     ManaOverlay->SetVisibility(ManaRequired > 0 ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
 }
 
+void USkillButton::SetSkill(TSubclassOf<ASkillBase> Skill_l)
+{
+    Skill = Skill_l;
+}
+
 void USkillButton::CallOnSkillButtonClicked()
 {
     if(OnSkillButtonClicked.IsBound())

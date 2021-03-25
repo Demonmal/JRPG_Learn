@@ -786,7 +786,7 @@ int ABattleController::CalculateDamage(int PureDamage, float DamageMultiplier)
 {
 	if (!IsHit())
 		return 0;
-	int Damage;
+	int Damage = 0;
 	int PhysDamage = UKismetMathLibrary::RandomIntegerInRange(CurrentAttackingUnit->GetMinAttack(), CurrentAttackingUnit->GetMaxAttack());
 	PhysDamage -= CurrentTargetUnit->GetDefense();
 	if (PhysDamage < 1)

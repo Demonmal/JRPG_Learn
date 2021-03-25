@@ -34,6 +34,8 @@ class JRPG_LEARN_API USkillButton : public UUserWidget
 	UFUNCTION(BlueprintImplementableEvent)
 	void Highlight(bool bIsHighlighted);
 
+	void SetSkill(TSubclassOf<ASkillBase> Skill_l);
+
 	UPROPERTY(BlueprintReadWrite)
 	TSubclassOf<ASkillBase> Skill;
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))

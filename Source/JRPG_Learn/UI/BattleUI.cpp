@@ -116,9 +116,9 @@ void UBattleUI::ShowSkills(APlayerUnitBase *PlayerUnit)
 {
     UnbindAllSkillEvents();
     BP_SkillUseDialogue->SetSkills(PlayerUnit->GetAvailableBattleSkills());
-    BP_SkillUseDialogue->ShowSkills();
-    BP_SkillUseDialogue->OnSkillSelected.AddUObject(this, &UBattleUI::OnSkillSelectedHandler);
-    BP_SkillUseDialogue->OnCanceled.AddUObject(this, &UBattleUI::OnSkillCancelledHandler);
+    // BP_SkillUseDialogue->ShowSkills();
+    // BP_SkillUseDialogue->OnSkillSelected.AddUObject(this, &UBattleUI::OnSkillSelectedHandler);
+    // BP_SkillUseDialogue->OnCanceled.AddUObject(this, &UBattleUI::OnSkillCancelledHandler);
 }
 
 void UBattleUI::OnSkillSelectedHandler(TSubclassOf<ABattleSkillBase> SelectedSkill)

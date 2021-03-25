@@ -63,6 +63,7 @@ void USkillUseDialogue::SetSkills(TArray<TSubclassOf<ABattleSkillBase>> Skills)
     for(const auto& Skill : Skills)
     {
         USkillButton* Button = CreateWidget<USkillButton>(GetWorld(), SkillButtonClass);
+        Button->SetSkill(Skill);
         SkillList->AddChild(Button);
         SkillButtons.Add(Button);
         Button->OnSkillButtonClicked.AddUObject(this, &USkillUseDialogue::OnSkillButtonClickedHandler);
